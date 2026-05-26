@@ -92,7 +92,7 @@ export default async (secretName: string) => {
     });
 
     return dbPassword;
-  } catch (error: unknown) {
+  } catch {
     return process.env[secretName];
   }
 };

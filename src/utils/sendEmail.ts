@@ -49,7 +49,8 @@ export default async (
     });
 
     return true;
-  } catch (error) {
+  } catch (error: unknown) {
+    console.log('==========> error.message', (error as Error).message);
     return false;
   }
 };

@@ -69,7 +69,7 @@ app.get('/health', (_req: Request, response: Response) => {
       healthStatus,
       messagesConstants.HEALTH_CHECK_SUCCESS
     );
-  } catch (error) {
+  } catch {
     apiResponse = ApiResponse.internalError(
       messagesConstants.HEALTH_CHECK_UNHEALTHY
     );
