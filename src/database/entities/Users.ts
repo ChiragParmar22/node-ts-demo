@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { DeviceType } from '../../constants/key.constants';
+import { DeviceType, SocialLoginType } from '../../constants/key.constants';
 
 @Entity('users')
 export class Users extends BaseEntity {
@@ -37,8 +37,21 @@ export class Users extends BaseEntity {
   @Column({ type: 'varchar', nullable: true })
   deviceToken!: string | null;
 
-  @Column()
-  password!: string;
+  @Column({
+    type: 'enum',
+    enum: SocialLoginType,
+    default: SocialLoginType.EMAIL,
+  })
+  socialLoginType!: SocialLoginType;
+
+  @Column({ type: 'varchar', nullable: true })
+  appleId!: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  googleId!: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  password!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   profilePicture!: string | null;

@@ -46,7 +46,15 @@ export default {
   PHONE_NUMBER_ALREADY_EXISTS:
     'This phone number is already registered with us. Please use a different number.',
   ACCOUNT_CREATED: 'Your account is registered successfully.',
-  SIGNIN_SUCCESSFULLY: 'Sign in successfully.',
+  LOGIN_SUCCESSFULLY: 'Login successfully.',
+  USER_REGISTERED_WITH_EMAIL:
+    'This user is registered with email. Please login with email.',
+  USER_REGISTERED_WITH_GOOGLE:
+    'This user is registered with google. Please login with google.',
+  USER_REGISTERED_WITH_APPLE:
+    'This user is registered with apple. Please login with apple.',
+  USER_REGISTERED_WITH_SOCIAL_LOGIN_CHANGE_PASSWORD:
+    'Social login user cannot change password.',
 
   OTP_SEND:
     'Authentication code has been sent successfully. Please check your email and enter the code to proceed.',
@@ -54,6 +62,8 @@ export default {
     'OTP has been expired or invalid. Please try again or resend OTP.',
   INVALID_OTP: 'Invalid OTP.',
   OTP_VERIFIED: 'OTP verified successfully.',
+  USER_REGISTERED_WITH_SOCIAL_LOGIN_FORGOT_PASSWORD:
+    'Social login user cannot forgot password.',
   PASSWORD_RESET_SUCCESSFULLY: 'Password reset successfully.',
   PASSWORD_ALREADY_USED:
     'Your new password is same as old password. Please use different password.',
@@ -77,4 +87,16 @@ export default {
   USER_LEFT_ROOM: 'Room left successfully.',
   INVALID_USER_ID: 'Invalid user ID provided.',
   ROOM_USER_NOT_FOUND: 'User not found. Cannot join or leave the room.',
+
+  SOCIAL_ACCOUNT_LINKED_TO_OTHER_EMAIL:
+    'This social account is linked to a different email address.',
+  SOCIAL_ACCOUNT_EMAIL_MISMATCH:
+    'Email address mismatch with this social account.',
+  EMAIL_ALREADY_LINKED_TO_OTHER_GOOGLE:
+    'This email is already linked to a different Google account.',
+  EMAIL_ALREADY_LINKED_TO_OTHER_APPLE:
+    'This email is already linked to a different Apple account.',
+  SOCIAL_ACCOUNT_ALREADY_REGISTERED:
+    'This social account is already registered. Please login.',
+  PASSWORD_REQUIRED_FOR_EMAIL_LOGIN: 'Password is required for email login.',
 };

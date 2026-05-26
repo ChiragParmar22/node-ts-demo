@@ -1,12 +1,14 @@
+import { SocialLoginType } from '../constants/key.constants';
 import messagesConstants from '../constants/messages.constants';
 import { OTPMaster } from '../database/entities/OTPMaster';
 import { Users } from '../database/entities/Users';
 import {
+  LoginInput,
   RefreshTokenInput,
+  RegisterInput,
   ResetPasswordInput,
   SendOtpInput,
-  SigninInput,
-  SignupInput,
+  SocialLoginInput,
   VerifyOtpInput,
 } from '../interfaces/user.interface';
 import OtpRepository from '../repositories/otp.repository';
@@ -40,7 +42,7 @@ const sanitizeUser = (user: Users) => {
  */
 export default class AuthService {
   /**
-   * Send OTP to email for signup
+   * Send OTP to email for registration
    * @param body - send otp input with email
    */
   static async sendOtp(body: SendOtpInput): Promise<ApiResponse> {
@@ -48,6 +50,15 @@ export default class AuthService {
 
     const existingUser = await UserRepository.findByEmail(email);
     if (existingUser) {
+      if (existingUser.socialLoginType === SocialLoginType.GOOGLE) {
+        return ApiResponse.badRequest(
+          messagesConstants.USER_REGISTERED_WITH_GOOGLE
+        );
+      } else if (existingUser.socialLoginType === SocialLoginType.APPLE) {
+        return ApiResponse.badRequest(
+          messagesConstants.USER_REGISTERED_WITH_APPLE
+        );
+      }
       return ApiResponse.badRequest(messagesConstants.EMAIL_ALREADY_EXISTS);
     }
 
@@ -84,23 +95,39 @@ export default class AuthService {
   }
 
   /**
-   * Register new user (signup)
-   * @param body - user signup credentials
+   * Register new user
+   * @param body - user register credentials
    * @param file - uploaded profile picture
    */
-  static async signup(
-    body: SignupInput,
+  static async register(
+    body: RegisterInput,
     file?: Express.Multer.File
   ): Promise<ApiResponse> {
-    const existingUser = await UserRepository.findByEmail(body.email);
+    const {
+      name,
+      email,
+      countryCode,
+      phoneNumber,
+      socialLoginType,
+      password,
+      otp,
+      appleId,
+      googleId,
+      deviceType,
+      deviceToken,
+      lat,
+      lng,
+    } = body;
+
+    const existingUser = await UserRepository.findByEmail(email);
     if (existingUser) {
       return ApiResponse.badRequest(messagesConstants.EMAIL_ALREADY_EXISTS);
     }
 
-    if (body.countryCode && body.phoneNumber) {
+    if (countryCode && phoneNumber) {
       const existingPhoneNumber = await UserRepository.findByPhoneNumber(
-        body.countryCode,
-        body.phoneNumber
+        countryCode,
+        phoneNumber
       );
       if (existingPhoneNumber) {
         return ApiResponse.badRequest(
@@ -109,30 +136,57 @@ export default class AuthService {
       }
     }
 
-    const otp = await OtpRepository.findByEmail(body.email);
-    if (!otp) {
-      return ApiResponse.badRequest(messagesConstants.OTP_EXPIRED);
+    let hashedPassword: string | null = null;
+
+    if (socialLoginType === SocialLoginType.EMAIL) {
+      if (!password) {
+        return ApiResponse.badRequest(
+          messagesConstants.PASSWORD_REQUIRED_FOR_EMAIL_LOGIN
+        );
+      }
+
+      const otpRecord = await OtpRepository.findByEmail(email);
+      if (!otpRecord) {
+        return ApiResponse.badRequest(messagesConstants.OTP_EXPIRED);
+      }
+
+      if (otpRecord.otp !== otp) {
+        return ApiResponse.badRequest(messagesConstants.INVALID_OTP);
+      }
+
+      await OtpRepository.deleteOtp(otpRecord.id);
+
+      hashedPassword = await BcryptjsUtil.hashPassword(password);
+    } else {
+      let userBySocialId: Users | null = null;
+      if (socialLoginType === SocialLoginType.GOOGLE && googleId) {
+        userBySocialId = await UserRepository.findUser({ googleId });
+      } else if (socialLoginType === SocialLoginType.APPLE && appleId) {
+        userBySocialId = await UserRepository.findUser({ appleId });
+      }
+
+      if (userBySocialId) {
+        return ApiResponse.badRequest(
+          messagesConstants.SOCIAL_ACCOUNT_ALREADY_REGISTERED
+        );
+      }
     }
-
-    if (otp.otp !== body.otp) {
-      return ApiResponse.badRequest(messagesConstants.INVALID_OTP);
-    }
-
-    await OtpRepository.deleteOtp(otp.id);
-
-    const hashedPassword = await BcryptjsUtil.hashPassword(body.password);
 
     const userData = {
-      name: body.name,
-      email: body.email,
-      countryCode: body?.countryCode,
-      phoneNumber: body?.phoneNumber,
+      name,
+      email,
+      countryCode,
+      phoneNumber,
+      socialLoginType,
       password: hashedPassword,
+      appleId: socialLoginType === SocialLoginType.APPLE ? appleId : undefined,
+      googleId:
+        socialLoginType === SocialLoginType.GOOGLE ? googleId : undefined,
       profilePicture: file?.filename,
-      deviceType: body?.deviceType,
-      deviceToken: body?.deviceToken,
-      lat: String(body?.lat),
-      lng: String(body?.lng),
+      deviceType,
+      deviceToken,
+      lat: lat !== undefined ? String(lat) : undefined,
+      lng: lng !== undefined ? String(lng) : undefined,
     };
 
     const newUser = await UserRepository.createUser(userData);
@@ -145,13 +199,27 @@ export default class AuthService {
 
   /**
    * Sign in user
-   * @param body - user signin credentials
+   * @param body - user login credentials
    */
-  static async signin(body: SigninInput): Promise<ApiResponse> {
+  static async login(body: LoginInput): Promise<ApiResponse> {
     const { email, password, deviceType, deviceToken } = body;
     const user = await UserRepository.findByEmail(email);
     if (!user) {
       return ApiResponse.notFound(messagesConstants.USER_NOT_REGISTERED);
+    }
+
+    if (user.socialLoginType === SocialLoginType.GOOGLE) {
+      return ApiResponse.badRequest(
+        messagesConstants.USER_REGISTERED_WITH_GOOGLE
+      );
+    } else if (user.socialLoginType === SocialLoginType.APPLE) {
+      return ApiResponse.badRequest(
+        messagesConstants.USER_REGISTERED_WITH_APPLE
+      );
+    }
+
+    if (!user.password) {
+      return ApiResponse.badRequest(messagesConstants.INCORRECT_PASSWORD);
     }
 
     const isPasswordValid = await BcryptjsUtil.comparePassword(
@@ -176,7 +244,120 @@ export default class AuthService {
 
     const result = { ...sanitizeUser(updatedUser), token };
 
-    return ApiResponse.success(result, messagesConstants.SIGNIN_SUCCESSFULLY);
+    return ApiResponse.success(result, messagesConstants.LOGIN_SUCCESSFULLY);
+  }
+
+  /**
+   * Social Login
+   * @param body - user social login credentials
+   */
+  static async socialLogin(body: SocialLoginInput): Promise<ApiResponse> {
+    const {
+      email,
+      socialLoginType,
+      appleId,
+      googleId,
+      deviceType,
+      deviceToken,
+    } = body;
+
+    const userByEmail = await UserRepository.findByEmail(email);
+
+    let userBySocialId: Users | null = null;
+    if (socialLoginType === SocialLoginType.GOOGLE && googleId) {
+      userBySocialId = await UserRepository.findUser({ googleId });
+    } else if (socialLoginType === SocialLoginType.APPLE && appleId) {
+      userBySocialId = await UserRepository.findUser({ appleId });
+    }
+
+    // Scenario 1: Neither exists
+    if (!userByEmail && !userBySocialId) {
+      return ApiResponse.notFound(messagesConstants.USER_NOT_REGISTERED);
+    }
+
+    let targetUser: Users;
+
+    if (userBySocialId) {
+      // Scenario 2: Both exist
+      if (userByEmail) {
+        if (userByEmail.id !== userBySocialId.id) {
+          return ApiResponse.badRequest(
+            messagesConstants.SOCIAL_ACCOUNT_LINKED_TO_OTHER_EMAIL
+          );
+        }
+        targetUser = userByEmail;
+      }
+      // Scenario 3: Social ID user exists, but email user does not exist (or doesn't match)
+      else {
+        return ApiResponse.badRequest(
+          messagesConstants.SOCIAL_ACCOUNT_EMAIL_MISMATCH
+        );
+      }
+    }
+    // Scenario 4: Email user exists, but Social ID user does not exist
+    else {
+      // Since userBySocialId is null, userByEmail must be non-null. We add a safe check here.
+      if (!userByEmail) {
+        return ApiResponse.notFound(messagesConstants.USER_NOT_REGISTERED);
+      }
+
+      // Check if this email is already linked to a different social account of the same type
+      if (socialLoginType === SocialLoginType.GOOGLE && userByEmail.googleId) {
+        return ApiResponse.badRequest(
+          messagesConstants.EMAIL_ALREADY_LINKED_TO_OTHER_GOOGLE
+        );
+      }
+      if (socialLoginType === SocialLoginType.APPLE && userByEmail.appleId) {
+        return ApiResponse.badRequest(
+          messagesConstants.EMAIL_ALREADY_LINKED_TO_OTHER_APPLE
+        );
+      }
+
+      // Check registered login method policies
+      if (userByEmail.socialLoginType === SocialLoginType.EMAIL) {
+        return ApiResponse.badRequest(
+          messagesConstants.USER_REGISTERED_WITH_EMAIL
+        );
+      } else if (userByEmail.socialLoginType === SocialLoginType.GOOGLE) {
+        return ApiResponse.badRequest(
+          messagesConstants.USER_REGISTERED_WITH_GOOGLE
+        );
+      } else if (userByEmail.socialLoginType === SocialLoginType.APPLE) {
+        return ApiResponse.badRequest(
+          messagesConstants.USER_REGISTERED_WITH_APPLE
+        );
+      }
+
+      targetUser = userByEmail;
+    }
+
+    const updateData: Partial<Users> = {
+      deviceType,
+      deviceToken,
+      lat: body.lat !== undefined ? String(body.lat) : undefined,
+      lng: body.lng !== undefined ? String(body.lng) : undefined,
+    };
+
+    if (appleId) {
+      updateData.appleId = appleId;
+    }
+    if (googleId) {
+      updateData.googleId = googleId;
+    }
+
+    const updatedUser = await UserRepository.updateUserById(
+      targetUser.id,
+      updateData
+    );
+    if (!updatedUser) {
+      return ApiResponse.notFound(messagesConstants.USER_NOT_REGISTERED);
+    }
+
+    const token = JwtUtil.generateToken({ id: targetUser.id });
+
+    const result = { ...sanitizeUser(updatedUser), token };
+
+    return ApiResponse.success(result, messagesConstants.LOGIN_SUCCESSFULLY);
   }
 
   /**
@@ -188,6 +369,12 @@ export default class AuthService {
     const user = await UserRepository.findByEmail(email);
     if (!user) {
       return ApiResponse.notFound(messagesConstants.USER_NOT_REGISTERED);
+    }
+
+    if (user.socialLoginType !== SocialLoginType.EMAIL || !user.password) {
+      return ApiResponse.badRequest(
+        messagesConstants.USER_REGISTERED_WITH_SOCIAL_LOGIN_FORGOT_PASSWORD
+      );
     }
 
     const otp = CommonFunctions.generateOtp();
@@ -248,12 +435,14 @@ export default class AuthService {
       return ApiResponse.notFound(messagesConstants.USER_NOT_REGISTERED);
     }
 
-    const isPasswordSame = await BcryptjsUtil.comparePassword(
-      password,
-      user.password
-    );
-    if (isPasswordSame) {
-      return ApiResponse.badRequest(messagesConstants.PASSWORD_ALREADY_USED);
+    if (user.password) {
+      const isPasswordSame = await BcryptjsUtil.comparePassword(
+        password,
+        user.password
+      );
+      if (isPasswordSame) {
+        return ApiResponse.badRequest(messagesConstants.PASSWORD_ALREADY_USED);
+      }
     }
 
     const hashedPassword = await BcryptjsUtil.hashPassword(password);

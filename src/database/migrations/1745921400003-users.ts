@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-import { DeviceType } from '../../constants/key.constants';
+import { DeviceType, SocialLoginType } from '../../constants/key.constants';
 
 export class Users1745921400003 implements MigrationInterface {
   private readonly table = new Table({
@@ -25,7 +25,16 @@ export class Users1745921400003 implements MigrationInterface {
         enumName: 'users_deviceType_enum',
       },
       { name: 'deviceToken', type: 'varchar', isNullable: true },
-      { name: 'password', type: 'varchar', isNullable: false },
+      {
+        name: 'socialLoginType',
+        type: 'enum',
+        enum: [...Object.values(SocialLoginType)],
+        default: `'${SocialLoginType.EMAIL}'`,
+        enumName: 'users_socialLoginType_enum',
+      },
+      { name: 'appleId', type: 'varchar', isNullable: true },
+      { name: 'googleId', type: 'varchar', isNullable: true },
+      { name: 'password', type: 'varchar', isNullable: true },
       { name: 'profilePicture', type: 'varchar', isNullable: true },
       { name: 'socketId', type: 'varchar', isNullable: true },
       { name: 'lat', type: 'numeric', precision: 10, scale: 7, default: 0 },
@@ -44,5 +53,6 @@ export class Users1745921400003 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropTable(this.table);
     await queryRunner.query('DROP TYPE IF EXISTS "users_deviceType_enum"');
+    await queryRunner.query('DROP TYPE IF EXISTS "users_socialLoginType_enum"');
   }
 }

@@ -17,8 +17,11 @@ import UserRepository from '../repositories/user.repository';
 import ApiResponse from './apiResponse';
 import { type SocketAckPayload, toSocketAck } from './socketResponse.util';
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-type SocketClientToServerEvents = {};
+type SocketClientToServerEvents = {
+  [SocketListenEvent.ROOM_JOIN]: (otherUserId: string) => void;
+  [SocketListenEvent.ROOM_LEAVE]: (otherUserId: string) => void;
+  [SocketListenEvent.DISCONNECT]: () => void;
+};
 
 type SocketServerToClientEvents = {
   [SocketEmitEvent.UNREAD_NOTIFICATION_COUNT]: (

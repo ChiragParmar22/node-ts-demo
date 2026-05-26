@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 
 import {
+  LoginInput,
   RefreshTokenInput,
+  RegisterInput,
   ResetPasswordInput,
   SendOtpInput,
-  SigninInput,
-  SignupInput,
+  SocialLoginInput,
   VerifyOtpInput,
 } from '../interfaces/user.interface';
 import AuthService from '../services/auth.services';
@@ -16,7 +17,7 @@ import AuthService from '../services/auth.services';
  */
 export default class AuthController {
   /**
-   * Handle send OTP for signup
+   * Handle send OTP for registration
    */
   static async sendOtp(
     request: Request,
@@ -32,16 +33,16 @@ export default class AuthController {
   }
 
   /**
-   * Handle user signup
+   * Handle user registration
    */
-  static async signup(
+  static async register(
     request: Request,
     response: Response,
     next: NextFunction
   ): Promise<unknown> {
     try {
-      const result = await AuthService.signup(
-        request.body as SignupInput,
+      const result = await AuthService.register(
+        request.body as RegisterInput,
         request.file as Express.Multer.File | undefined
       );
       return response.status(result.statusCode).json(result);
@@ -51,15 +52,33 @@ export default class AuthController {
   }
 
   /**
-   * Handle user signin
+   * Handle user login
    */
-  static async signin(
+  static async login(
     request: Request,
     response: Response,
     next: NextFunction
   ): Promise<unknown> {
     try {
-      const result = await AuthService.signin(request.body as SigninInput);
+      const result = await AuthService.login(request.body as LoginInput);
+      return response.status(result.statusCode).json(result);
+    } catch (error: unknown) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Handle user social login
+   */
+  static async socialLogin(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<unknown> {
+    try {
+      const result = await AuthService.socialLogin(
+        request.body as SocialLoginInput
+      );
       return response.status(result.statusCode).json(result);
     } catch (error: unknown) {
       return next(error);

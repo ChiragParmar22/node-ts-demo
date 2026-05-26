@@ -54,16 +54,22 @@ authRoutes.post(
 );
 
 authRoutes.post(
-  '/signup',
+  '/register',
   upload.single('profilePicture'),
-  validateRequest(userValidations.signupUserSchema),
-  AuthController.signup
+  validateRequest(userValidations.registerUserSchema),
+  AuthController.register
 );
 
 authRoutes.post(
-  '/signin',
-  validateRequest(userValidations.signinUserSchema),
-  AuthController.signin
+  '/login',
+  validateRequest(userValidations.loginUserSchema),
+  AuthController.login
+);
+
+authRoutes.post(
+  '/socialLogin',
+  validateRequest(userValidations.socialLoginSchema),
+  AuthController.socialLogin
 );
 
 authRoutes.post(

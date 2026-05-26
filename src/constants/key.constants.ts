@@ -3,6 +3,12 @@ export enum DeviceType {
   android = 'android',
 }
 
+export enum SocialLoginType {
+  EMAIL = 'email',
+  GOOGLE = 'google',
+  APPLE = 'apple',
+}
+
 export enum NotificationType {}
 
 export enum NotificationStatus {

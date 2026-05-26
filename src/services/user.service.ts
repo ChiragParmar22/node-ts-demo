@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+import { SocialLoginType } from '../constants/key.constants';
 import messagesConstants from '../constants/messages.constants';
 import { Users } from '../database/entities/Users';
 import {
@@ -100,6 +101,12 @@ export default class UserService {
     user: Users,
     body: ChangePasswordInput
   ): Promise<ApiResponse> {
+    if (user.socialLoginType !== SocialLoginType.EMAIL || !user.password) {
+      return ApiResponse.badRequest(
+        messagesConstants.USER_REGISTERED_WITH_SOCIAL_LOGIN_CHANGE_PASSWORD
+      );
+    }
+
     const isCurrentPasswordCorrect = await BcryptjsUtil.comparePassword(
       body.currentPassword,
       user.password

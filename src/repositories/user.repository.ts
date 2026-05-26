@@ -1,4 +1,4 @@
-import { IsNull } from 'typeorm';
+import { FindOptionsWhere, IsNull } from 'typeorm';
 
 import { AppDataSource } from '../database/dbConnection';
 import { Users } from '../database/entities/Users';
@@ -39,6 +39,12 @@ export default class UserRepository {
   static async findById(id: string): Promise<Users | null> {
     return await this.repository.findOne({
       where: { id, deletedAt: IsNull() },
+    });
+  }
+
+  static async findUser(filter: Partial<Users>): Promise<Users | null> {
+    return await this.repository.findOne({
+      where: { ...filter, deletedAt: IsNull() } as FindOptionsWhere<Users>,
     });
   }
 }

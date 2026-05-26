@@ -59,6 +59,6 @@ export default (app: Application): void => {
     legacyHeaders: false,
   });
 
-  // Apply strict rate limiter to signin endpoint
-  app.use('/api/auth/signin', authLimiter);
+  // Apply strict rate limiter to login endpoint
+  app.use('/api/auth/login', authLimiter);
 };

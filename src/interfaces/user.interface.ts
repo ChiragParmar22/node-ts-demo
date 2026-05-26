@@ -1,4 +1,4 @@
-import { DeviceType } from '../constants/key.constants';
+import { DeviceType, SocialLoginType } from '../constants/key.constants';
 
 /**
  * Send OTP input interface
@@ -11,15 +11,30 @@ export interface SendOtpInput {
 }
 
 /**
- * User signup input interface
+ * User register input interface
  */
-export interface SignupInput {
+export interface RegisterInput {
   name: string;
   email: string;
   countryCode?: string;
   phoneNumber?: string;
+  socialLoginType?: SocialLoginType;
+  password?: string;
+  otp?: string;
+  appleId?: string | null;
+  googleId?: string | null;
+  deviceType: DeviceType.iOS | DeviceType.android;
+  deviceToken?: string | null;
+  lat?: number;
+  lng?: number;
+}
+
+/**
+ * User login input interface
+ */
+export interface LoginInput {
+  email: string;
   password: string;
-  otp: string;
   deviceType?: DeviceType.iOS | DeviceType.android | null;
   deviceToken?: string | null;
   lat?: number;
@@ -27,12 +42,14 @@ export interface SignupInput {
 }
 
 /**
- * User signin input interface
+ * Social login input interface
  */
-export interface SigninInput {
+export interface SocialLoginInput {
   email: string;
-  password: string;
-  deviceType?: DeviceType.iOS | DeviceType.android | null;
+  socialLoginType: SocialLoginType;
+  appleId?: string | null;
+  googleId?: string | null;
+  deviceType: DeviceType.iOS | DeviceType.android;
   deviceToken?: string | null;
   lat?: number;
   lng?: number;
