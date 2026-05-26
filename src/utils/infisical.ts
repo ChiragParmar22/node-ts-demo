@@ -50,7 +50,7 @@ const getSecretValue = async ({
   projectId,
   environment,
   secretName,
-  path = '/uPark_dev',
+  path = '/NodeTsDemo_dev',
   type = SecretType.Shared,
   siteUrl,
 }: GetSecretValueParams) => {
@@ -87,7 +87,7 @@ export default async (secretName: string) => {
       clientSecret,
       projectId,
       environment: process.env.INFISICAL_ENV || 'dev',
-      path: '/uPark_dev',
+      path: '/NodeTsDemo_dev',
       secretName,
     });
 

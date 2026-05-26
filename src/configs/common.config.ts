@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 // import fs from 'fs';
 import { Secret } from 'jsonwebtoken';
 dotenv.config();
-// dotenv.config({ path: '/var/www/dev.api.upark.co.uk/.env' });
+// dotenv.config({ path: '/var/www/dev.api.NodeTsDemo.com/.env' });
 
 // const env = fs.readFileSync('/etc/environment', 'utf8');
 // env.split('\n').forEach((line) => {
@@ -29,7 +29,7 @@ const DB_PASSWORD = process.env.DB_PASSWORD || '';
 const DB_NAME = process.env.DB_NAME || '';
 
 export default {
-  APP_NAME: process.env.APP_NAME || 'uPark',
+  APP_NAME: process.env.APP_NAME || 'NodeTsDemo',
   PORT,
   NODE_ENV,
 
@@ -49,7 +49,7 @@ export default {
   DB_PASSWORD,
   DB_NAME,
 
-  CLIENT_EMAIL: process.env.CLIENT_EMAIL || 'upark@gmail.com',
+  CLIENT_EMAIL: process.env.CLIENT_EMAIL || 'NodeTsDemo@gmail.com',
 
   MAINTENANCE_MODE: process.env.MAINTENANCE_MODE === 'true',
 
