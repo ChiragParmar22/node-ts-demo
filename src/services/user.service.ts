@@ -1,0 +1,160 @@
+import fs from 'fs';
+import path from 'path';
+
+import messagesConstants from '../constants/messages.constants';
+import { Users } from '../database/entities/Users';
+import {
+  ChangePasswordInput,
+  DeleteAccountInput,
+  UpdateProfileInput,
+} from '../interfaces/user.interface';
+import UserRepository from '../repositories/user.repository';
+import ApiResponse from '../utils/apiResponse';
+import BcryptjsUtil from '../utils/bcryptjs.util';
+import CommonFunctions from '../utils/commonFunctions';
+
+/**
+ * Remove sensitive fields from user object
+ */
+const sanitizeUser = (user: Users) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+  const { password, ...safeUser } = user;
+
+  safeUser.profilePicture = safeUser.profilePicture
+    ? CommonFunctions.getImageUrl(
+        `public/profilePictures/${safeUser.profilePicture}`
+      )
+    : null;
+
+  return safeUser;
+};
+
+const removeProfilePictureFile = (filename?: string | null): void => {
+  if (!filename) return;
+
+  const imagePath = path.join(
+    __dirname,
+    'src/public/profilePictures',
+    filename
+  );
+  if (fs.existsSync(imagePath)) {
+    fs.unlinkSync(imagePath);
+  }
+};
+
+export default class UserService {
+  /**
+   * Get current user profile
+   */
+  static async getProfile(user: Users): Promise<ApiResponse> {
+    return ApiResponse.success(
+      sanitizeUser(user),
+      messagesConstants.PROFILE_FETCHED_SUCCESSFULLY
+    );
+  }
+
+  /**
+   * Update user profile
+   */
+  static async updateProfile(
+    user: Users,
+    body: UpdateProfileInput,
+    file?: Express.Multer.File
+  ): Promise<ApiResponse> {
+    const updateData: Partial<Users> = {
+      name: body.name || user.name,
+      countryCode: body.countryCode || user.countryCode,
+      phoneNumber: body.phoneNumber || user.phoneNumber,
+    };
+
+    const shouldRemovePicture =
+      body.removeProfilePicture === true ||
+      body.removeProfilePicture === 'true';
+
+    if (shouldRemovePicture) {
+      removeProfilePictureFile(user.profilePicture);
+      updateData.profilePicture = null;
+    } else if (file?.filename) {
+      removeProfilePictureFile(user.profilePicture);
+      updateData.profilePicture = file.filename;
+    }
+
+    const updatedUser = await UserRepository.updateUserById(
+      user.id,
+      updateData
+    );
+    if (!updatedUser) {
+      return ApiResponse.notFound(messagesConstants.USER_NOT_FOUND);
+    }
+
+    return ApiResponse.success(
+      sanitizeUser(updatedUser),
+      messagesConstants.PROFILE_UPDATED_SUCCESSFULLY
+    );
+  }
+
+  /**
+   * Change user password
+   */
+  static async changePassword(
+    user: Users,
+    body: ChangePasswordInput
+  ): Promise<ApiResponse> {
+    const isCurrentPasswordCorrect = await BcryptjsUtil.comparePassword(
+      body.currentPassword,
+      user.password
+    );
+    if (!isCurrentPasswordCorrect) {
+      return ApiResponse.badRequest(messagesConstants.INCORRECT_PASSWORD);
+    }
+
+    const isPasswordSame = await BcryptjsUtil.comparePassword(
+      body.newPassword,
+      user.password
+    );
+    if (isPasswordSame) {
+      return ApiResponse.badRequest(messagesConstants.PASSWORD_ALREADY_USED);
+    }
+
+    const hashedPassword = await BcryptjsUtil.hashPassword(body.newPassword);
+    await UserRepository.updateUserById(user.id, { password: hashedPassword });
+
+    return ApiResponse.success(
+      {},
+      messagesConstants.PASSWORD_CHANGED_SUCCESSFULLY
+    );
+  }
+
+  /**
+   * Logout user
+   */
+  static async logout(user: Users): Promise<ApiResponse> {
+    await UserRepository.updateUserById(user.id, {
+      deviceType: null,
+      deviceToken: null,
+    });
+
+    return ApiResponse.success({}, messagesConstants.LOGOUT_SUCCESSFULLY);
+  }
+
+  /**
+   * Delete account (soft delete)
+   */
+  static async deleteAccount(
+    user: Users,
+    body: DeleteAccountInput
+  ): Promise<ApiResponse> {
+    await UserRepository.updateUserById(user.id, {
+      deletedAt: new Date(),
+      deleteReason: body.deleteReason,
+      deviceType: null,
+      deviceToken: null,
+      socketId: null,
+    });
+
+    return ApiResponse.success(
+      {},
+      messagesConstants.ACCOUNT_DELETED_SUCCESSFULLY
+    );
+  }
+}

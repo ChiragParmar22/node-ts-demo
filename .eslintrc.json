@@ -1,0 +1,84 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": [
+    "@typescript-eslint",
+    "@typescript-eslint/eslint-plugin",
+    "prettier",
+    "simple-import-sort"
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/interface-name-prefix": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/dot-notation": "off",
+    "camelcase": [
+      "error",
+      {
+        "properties": "never",
+        "ignoreDestructuring": true,
+        "ignoreImports": true,
+        "ignoreGlobals": true
+      }
+    ],
+    "no-return-await": "off",
+    "no-useless-constructor": "off",
+    "dot-notation": "off",
+    "no-empty-function": ["error", { "allow": ["constructors"] }],
+    "class-methods-use-this": "off",
+    "func-names": ["error", "never"],
+    "no-plusplus": [2, { "allowForLoopAfterthoughts": true }],
+    "prefer-destructuring": "off",
+
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "eqeqeq": "error",
+    "semi": ["error", "always"],
+    "object-shorthand": ["error", "always"],
+    "prefer-const": [
+      "error",
+      {
+        "destructuring": "all",
+        "ignoreReadBeforeAssign": false
+      }
+    ],
+    "sort-imports": "off",
+    "import/order": "off",
+    "simple-import-sort/imports": [
+      "error",
+      {
+        "groups": [
+          ["^\\u0000"],
+          ["^node:", "^[a-zA-Z]"],
+          ["^@/"],
+          ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
+          ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"]
+        ]
+      }
+    ],
+    "simple-import-sort/exports": "error"
+  },
+  "root": true,
+  "env": {
+    "node": true,
+    "es2021": true
+  },
+  "ignorePatterns": [".eslintrc.js"]
+}

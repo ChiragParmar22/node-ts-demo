@@ -1,0 +1,65 @@
+.agents/
+skills-lock.json
+
+src/utils/firebase_config.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+memorylogs
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage
+*.lcov
+.nyc_output
+
+# Dependency directories
+node_modules/
+package-lock.json
+jspm_packages/
+
+# TypeScript
+*.tsbuildinfo
+build
+dist
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Cache directories
+.npm
+.eslintcache
+.cache
+.parcel-cache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+/backups
+src/public/profilePictures

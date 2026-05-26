@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Help And Support - uPark</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Poppins', Arial, sans-serif;
+        background: #f5f9ff;
+        color: #222;
+        overflow: hidden;
+      }
+      .container {
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 10px;
+      }
+      .left,
+      .right {
+        background: transparent;
+      }
+      .left {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        text-align: center;
+      }
+      .brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .brand-logo {
+        max-width: 140px;
+        height: auto;
+        margin-bottom: 12px;
+      }
+      .logo {
+        font-size: 2.8rem;
+        font-family: 'Georgia', serif;
+        color: #222;
+        letter-spacing: 2px;
+      }
+      .logo span {
+        color: #2e8b57;
+      }
+      .support-title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .support-desc {
+        color: #888;
+        font-size: 1rem;
+        margin-bottom: 8px;
+      }
+      .support-note {
+        color: #b0b0b0;
+        font-size: 0.95rem;
+        margin-bottom: 0;
+      }
+      .right {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+      .form-box {
+        width: 100%;
+        max-width: 400px;
+      }
+      .form-group {
+        margin-bottom: 18px;
+      }
+      label {
+        display: block;
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      .required {
+        color: #e74c3c;
+        margin-left: 2px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid #e0e7ef;
+        border-radius: 7px;
+        font-size: 1rem;
+        background: #f5f9ff;
+        outline: none;
+        resize: none;
+      }
+      input:focus,
+      textarea:focus {
+        border-color: #2e8b57;
+      }
+      .btn-submit {
+        width: 100%;
+        padding: 14px 0;
+        background: #1766d9;
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 10px;
+      }
+      .btn-submit:hover {
+        background: #1252b8;
+      }
+      #formStatus {
+        margin-top: 10px;
+        font-size: 1rem;
+      }
+      @media (max-width: 900px) {
+        .container {
+          flex-direction: column;
+        }
+      }
+      @media (max-width: 600px) {
+        .brand-logo {
+          max-width: 110px;
+        }
+
+        .logo {
+          font-size: 2.2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="left">
+        <div class="brand">
+          <!-- CHANGE PATH IF NEEDED -->
+          <img
+            src="/src/public/images/logo.png"
+            alt="uPark Logo"
+            class="brand-logo"
+          />
+          <div class="logo">uPark</div>
+        </div>
+
+        <div class="support-title">Help And Support</div>
+        <div class="support-desc">
+          If you have any questions, issues, or feedback, we're here to help!
+        </div>
+        <div class="support-note">
+          Please fill out the form below, and our support team will get back to
+          you as soon as possible.
+        </div>
+      </div>
+      <div class="right">
+        <form class="form-box" id="supportForm">
+          <div class="form-group">
+            <label>Name <span class="required">*</span></label>
+            <input type="text" name="name" placeholder="Enter Name" required />
+          </div>
+
+          <div class="form-group">
+            <label>Email Address <span class="required">*</span></label>
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter Email Address"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Subject <span class="required">*</span></label>
+            <input
+              type="text"
+              name="subject"
+              placeholder="Enter Subject"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Message <span class="required">*</span></label>
+            <textarea
+              name="message"
+              rows="4"
+              placeholder="Write Here..."
+              required
+            ></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit">Send</button>
+          <div id="formStatus"></div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById('supportForm')
+        .addEventListener('submit', async function (event) {
+          event.preventDefault();
+
+          const statusDiv = document.getElementById('formStatus');
+          statusDiv.style.color = '#333';
+          statusDiv.textContent = 'Sending...';
+
+          try {
+            // Build JSON payload exactly like the curl API
+            const fd = new FormData(event.target);
+            const payload = {
+              name: (fd.get('name') || '').toString().trim(),
+              email: (fd.get('email') || '').toString().trim(),
+              subject: (fd.get('subject') || '').toString().trim(),
+              message: (fd.get('message') || '').toString().trim(),
+            };
+
+            const response = await fetch(
+              'http://localhost:5050/api/contactUs',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  devicetype: 'web',
+                },
+                body: JSON.stringify(payload),
+              }
+            );
+
+            if (response.ok) {
+              statusDiv.style.color = 'green';
+              statusDiv.textContent =
+                'Your message has been sent successfully!';
+              event.target.reset();
+            } else {
+              const errText = await response.text().catch(() => '');
+              statusDiv.style.color = 'red';
+              statusDiv.textContent =
+                'Failed to send message. ' + (errText ? `(${errText})` : '');
+            }
+          } catch (error) {
+            console.log('Error submitting form:', error);
+            statusDiv.style.color = 'red';
+            statusDiv.textContent =
+              'An error occurred. Please try again later.';
+          }
+        });
+    </script>
+  </body>
+</html>
