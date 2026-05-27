@@ -1,11 +1,11 @@
+import { Types } from 'mongoose';
+
 import {
   NotificationStatus,
-  NotificationType,
   SocketEmitEvent,
 } from '../constants/key.constants';
 import messagesConstants from '../constants/messages.constants';
 import { GetNotificationsQuery } from '../interfaces/notification.interface';
-import { INotification } from '../models/Notification';
 import { IUsers } from '../models/Users';
 import NotificationRepository from '../repositories/notification.repository';
 import UserRepository from '../repositories/user.repository';
@@ -45,15 +45,18 @@ export default class NotificationService {
 
   static async createNotification(payload: {
     userId: string;
-    type: NotificationType;
+    type: string;
     title: string;
     message: string;
-    data: Record<string, unknown>;
+    data?: Record<string, unknown>;
     status?: NotificationStatus;
   }): Promise<void> {
-    const { userId, type, title, message, data } = payload;
+    const { userId, type, title, message, data = {} } = payload;
 
-    const createdNotification = await NotificationRepository.create(payload);
+    const createdNotification = await NotificationRepository.create({
+      ...payload,
+      userId: new Types.ObjectId(userId),
+    });
 
     const user = await UserRepository.findById(userId);
     const deviceToken = user?.deviceToken;

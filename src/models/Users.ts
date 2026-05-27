@@ -26,7 +26,7 @@ export interface IUsers extends Document {
 const UsersSchema = new Schema<IUsers>(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
     countryCode: { type: String, default: null },
     phoneNumber: { type: String, default: null },
     deviceType: {
