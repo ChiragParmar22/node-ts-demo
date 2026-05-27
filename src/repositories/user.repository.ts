@@ -1,50 +1,42 @@
-import { FindOptionsWhere, IsNull } from 'typeorm';
+import { FilterQuery, Types } from 'mongoose';
 
-import { AppDataSource } from '../database/dbConnection';
-import { Users } from '../database/entities/Users';
+import { IUsers, Users } from '../models/Users';
 
 export default class UserRepository {
-  private static get repository() {
-    return AppDataSource.getRepository(Users);
-  }
-
-  static async createUser(userData: Partial<Users>): Promise<Users> {
-    const user = this.repository.create(userData);
-    return await this.repository.save(user);
+  static async createUser(userData: Partial<IUsers>): Promise<IUsers> {
+    return await Users.create(userData);
   }
 
   static async updateUserById(
-    id: string,
-    data: Partial<Users>
-  ): Promise<Users | null> {
-    await this.repository.update(id, data);
-    return await this.findById(id);
+    id: string | Types.ObjectId,
+    data: Partial<IUsers>
+  ): Promise<IUsers | null> {
+    return await Users.findByIdAndUpdate(id, {
+      ...data,
+      updatedDate: new Date(),
+    });
   }
 
-  static async findByEmail(email: string): Promise<Users | null> {
-    return await this.repository.findOne({
-      where: { email, deletedAt: IsNull() },
-    });
+  static async findByEmail(email: string): Promise<IUsers | null> {
+    return await Users.findOne({ email, deletedAt: null });
   }
 
   static async findByPhoneNumber(
     countryCode: string,
     phoneNumber: string
-  ): Promise<Users | null> {
-    return await this.repository.findOne({
-      where: { countryCode, phoneNumber, deletedAt: IsNull() },
+  ): Promise<IUsers | null> {
+    return await Users.findOne({
+      countryCode,
+      phoneNumber,
+      deletedAt: null,
     });
   }
 
-  static async findById(id: string): Promise<Users | null> {
-    return await this.repository.findOne({
-      where: { id, deletedAt: IsNull() },
-    });
+  static async findById(id: string | Types.ObjectId): Promise<IUsers | null> {
+    return await Users.findOne({ _id: id, deletedAt: null });
   }
 
-  static async findUser(filter: Partial<Users>): Promise<Users | null> {
-    return await this.repository.findOne({
-      where: { ...filter, deletedAt: IsNull() } as FindOptionsWhere<Users>,
-    });
+  static async findUser(filter: FilterQuery<IUsers>): Promise<IUsers | null> {
+    return await Users.findOne({ ...filter, deletedAt: null });
   }
 }

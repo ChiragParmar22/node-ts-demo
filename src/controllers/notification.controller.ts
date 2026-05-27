@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { Users } from '../database/entities/Users';
 import { GetNotificationsQuery } from '../interfaces/notification.interface';
+import { IUsers } from '../models/Users';
 import NotificationService from '../services/notification.service';
 
 export default class NotificationController {
@@ -12,7 +12,7 @@ export default class NotificationController {
   ): Promise<unknown> {
     try {
       const result = await NotificationService.getNotifications(
-        request.user as Users,
+        request.user as IUsers,
         request.query as unknown as GetNotificationsQuery
       );
       return response.status(result.statusCode).json(result);

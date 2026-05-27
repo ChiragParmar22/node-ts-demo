@@ -3,12 +3,12 @@ import path from 'path';
 
 import { SocialLoginType } from '../constants/key.constants';
 import messagesConstants from '../constants/messages.constants';
-import { Users } from '../database/entities/Users';
 import {
   ChangePasswordInput,
   DeleteAccountInput,
   UpdateProfileInput,
 } from '../interfaces/user.interface';
+import { IUsers } from '../models/Users';
 import UserRepository from '../repositories/user.repository';
 import ApiResponse from '../utils/apiResponse';
 import BcryptjsUtil from '../utils/bcryptjs.util';
@@ -17,7 +17,7 @@ import CommonFunctions from '../utils/commonFunctions';
 /**
  * Remove sensitive fields from user object
  */
-const sanitizeUser = (user: Users) => {
+const sanitizeUser = (user: IUsers) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   const { password, ...safeUser } = user;
 
@@ -47,7 +47,7 @@ export default class UserService {
   /**
    * Get current user profile
    */
-  static async getProfile(user: Users): Promise<ApiResponse> {
+  static async getProfile(user: IUsers): Promise<ApiResponse> {
     return ApiResponse.success(
       sanitizeUser(user),
       messagesConstants.PROFILE_FETCHED_SUCCESSFULLY
@@ -58,11 +58,11 @@ export default class UserService {
    * Update user profile
    */
   static async updateProfile(
-    user: Users,
+    user: IUsers,
     body: UpdateProfileInput,
     file?: Express.Multer.File
   ): Promise<ApiResponse> {
-    const updateData: Partial<Users> = {
+    const updateData: Partial<IUsers> = {
       name: body.name || user.name,
       countryCode: body.countryCode || user.countryCode,
       phoneNumber: body.phoneNumber || user.phoneNumber,
@@ -81,7 +81,7 @@ export default class UserService {
     }
 
     const updatedUser = await UserRepository.updateUserById(
-      user.id,
+      user._id,
       updateData
     );
     if (!updatedUser) {
@@ -98,7 +98,7 @@ export default class UserService {
    * Change user password
    */
   static async changePassword(
-    user: Users,
+    user: IUsers,
     body: ChangePasswordInput
   ): Promise<ApiResponse> {
     if (user.socialLoginType !== SocialLoginType.EMAIL || !user.password) {
@@ -124,7 +124,7 @@ export default class UserService {
     }
 
     const hashedPassword = await BcryptjsUtil.hashPassword(body.newPassword);
-    await UserRepository.updateUserById(user.id, { password: hashedPassword });
+    await UserRepository.updateUserById(user._id, { password: hashedPassword });
 
     return ApiResponse.success(
       {},
@@ -135,8 +135,8 @@ export default class UserService {
   /**
    * Logout user
    */
-  static async logout(user: Users): Promise<ApiResponse> {
-    await UserRepository.updateUserById(user.id, {
+  static async logout(user: IUsers): Promise<ApiResponse> {
+    await UserRepository.updateUserById(user._id, {
       deviceType: null,
       deviceToken: null,
     });
@@ -148,10 +148,10 @@ export default class UserService {
    * Delete account (soft delete)
    */
   static async deleteAccount(
-    user: Users,
+    user: IUsers,
     body: DeleteAccountInput
   ): Promise<ApiResponse> {
-    await UserRepository.updateUserById(user.id, {
+    await UserRepository.updateUserById(user._id, {
       deletedAt: new Date(),
       deleteReason: body.deleteReason,
       deviceType: null,

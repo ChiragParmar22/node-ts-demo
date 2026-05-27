@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { Users } from '../database/entities/Users';
 import {
   ChangePasswordInput,
   DeleteAccountInput,
   UpdateProfileInput,
 } from '../interfaces/user.interface';
+import { IUsers } from '../models/Users';
 import UserService from '../services/user.service';
 
 /**
@@ -22,7 +22,7 @@ export default class UserController {
     next: NextFunction
   ): Promise<unknown> {
     try {
-      const result = await UserService.getProfile(request.user as Users);
+      const result = await UserService.getProfile(request.user as IUsers);
       return response.status(result.statusCode).json(result);
     } catch (error: unknown) {
       return next(error);
@@ -39,7 +39,7 @@ export default class UserController {
   ): Promise<unknown> {
     try {
       const result = await UserService.updateProfile(
-        request.user as Users,
+        request.user as IUsers,
         request.body as UpdateProfileInput,
         request.file as Express.Multer.File | undefined
       );
@@ -59,7 +59,7 @@ export default class UserController {
   ): Promise<unknown> {
     try {
       const result = await UserService.changePassword(
-        request.user as Users,
+        request.user as IUsers,
         request.body as ChangePasswordInput
       );
       return response.status(result.statusCode).json(result);
@@ -77,7 +77,7 @@ export default class UserController {
     next: NextFunction
   ): Promise<unknown> {
     try {
-      const result = await UserService.logout(request.user as Users);
+      const result = await UserService.logout(request.user as IUsers);
       return response.status(result.statusCode).json(result);
     } catch (error: unknown) {
       return next(error);
@@ -94,7 +94,7 @@ export default class UserController {
   ): Promise<unknown> {
     try {
       const result = await UserService.deleteAccount(
-        request.user as Users,
+        request.user as IUsers,
         request.body as DeleteAccountInput
       );
       return response.status(result.statusCode).json(result);

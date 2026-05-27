@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import { Server } from 'http';
@@ -10,16 +8,16 @@ import path from 'path';
 
 import config from './configs/common.config';
 import messagesConstants from './constants/messages.constants';
-import {
-  connectDatabase,
-  disconnectDatabase,
-  isDatabaseConnected,
-} from './database/dbConnection';
 import appVersionMiddleware from './middlewares/appVersion.middleware';
 import errorHandler from './middlewares/error.middleware';
 import loggerMiddleware from './middlewares/logger.middleware';
 import maintenanceMiddleware from './middlewares/maintenance.middleware';
 import setupSecurity from './middlewares/security.middleware';
+import {
+  connectDatabase,
+  disconnectDatabase,
+  isDatabaseConnected,
+} from './models/dbConnection';
 import ApiResponse from './utils/apiResponse';
 import nodeCron from './utils/nodeCron';
 import { initializeSocket } from './utils/socket';

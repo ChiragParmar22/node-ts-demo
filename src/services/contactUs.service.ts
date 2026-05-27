@@ -1,13 +1,15 @@
 import config from '../configs/common.config';
 import messagesConstants from '../constants/messages.constants';
-import { ContactUs } from '../database/entities/ContactUs';
+import { IContactUs } from '../models/ContactUs';
 import ContactUsRepository from '../repositories/contactUs.repository';
 import ApiResponse from '../utils/apiResponse';
 import { ContactUsArgs, contactUsMail } from '../utils/emailContent';
 import sendEmail from '../utils/sendEmail';
 
 export default class ContactUsService {
-  static async createContactUs(data: Partial<ContactUs>): Promise<ApiResponse> {
+  static async createContactUs(
+    data: Partial<IContactUs>
+  ): Promise<ApiResponse> {
     await ContactUsRepository.createContactUs(data);
 
     const emailContent = contactUsMail({

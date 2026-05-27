@@ -62,11 +62,10 @@ export const initializeSocket = (
 
   // connection
   io.on(SocketIoServerEvent.CONNECTION, async (socket) => {
-    console.log(
-      `Socket connected: ${socket.id}, (userId: ${socket.data.user?.id})`
-    );
+    const userId = socket.data.user?._id?.toString();
 
-    const userId = socket.data.user?.id;
+    console.log(`Socket connected: ${socket.id}, (userId: ${userId})`);
+
     if (userId) {
       await UserRepository.updateUserById(userId, {
         socketId: socket.id,
@@ -77,8 +76,6 @@ export const initializeSocket = (
 
     // room join
     socket.on(SocketListenEvent.ROOM_JOIN, async (otherUserId: string) => {
-      const currentUserId = socket.data.user?.id;
-
       if (!otherUserId || typeof otherUserId !== 'string') {
         socket.emit(
           SocketEmitEvent.SET_ROOM_JOIN,
@@ -96,24 +93,19 @@ export const initializeSocket = (
         return;
       }
 
-      const roomId = [currentUserId, otherUserId].sort().join('_');
+      const roomId = [userId, otherUserId].sort().join('_');
       socket.join(roomId);
 
       io?.to(roomId).emit(
         SocketEmitEvent.SET_ROOM_JOIN,
         toSocketAck(
-          ApiResponse.success(
-            { userId: currentUserId, roomId },
-            messages.USER_JOINED_ROOM
-          )
+          ApiResponse.success({ userId, roomId }, messages.USER_JOINED_ROOM)
         )
       );
     });
 
     // room leave
     socket.on(SocketListenEvent.ROOM_LEAVE, async (otherUserId: string) => {
-      const currentUserId = socket.data.user?.id;
-
       if (!otherUserId || typeof otherUserId !== 'string') {
         socket.emit(
           SocketEmitEvent.SET_ROOM_LEAVE,
@@ -131,14 +123,11 @@ export const initializeSocket = (
         return;
       }
 
-      const roomId = [currentUserId, otherUserId].sort().join('_');
+      const roomId = [userId, otherUserId].sort().join('_');
       io?.to(roomId).emit(
         SocketEmitEvent.SET_ROOM_LEAVE,
         toSocketAck(
-          ApiResponse.success(
-            { userId: currentUserId, roomId },
-            messages.USER_LEFT_ROOM
-          )
+          ApiResponse.success({ userId, roomId }, messages.USER_LEFT_ROOM)
         )
       );
       socket.leave(roomId);
@@ -146,19 +135,15 @@ export const initializeSocket = (
 
     // disconnect
     socket.on(SocketListenEvent.DISCONNECT, async () => {
-      console.log(
-        `Socket disconnected: ${socket.id}, (userId: ${socket.data.user?.id})`
-      );
-      const disconnectUser = socket.data.user;
-      if (disconnectUser) {
+      console.log(`Socket disconnected: ${socket.id}, (userId: ${userId})`);
+
+      if (userId) {
         try {
-          await UserRepository.updateUserById(disconnectUser.id, {
+          await UserRepository.updateUserById(userId, {
             socketId: null,
           });
         } catch {
-          console.error(
-            `Failed to clear socketId for user ${disconnectUser.id}`
-          );
+          console.error(`Failed to clear socketId for user ${userId}`);
         }
       }
     });

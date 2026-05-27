@@ -1,61 +1,59 @@
-import { FindOptionsWhere, IsNull } from 'typeorm';
+import { FilterQuery, Types, UpdateWriteOpResult } from 'mongoose';
 
 import { NotificationStatus } from '../constants/key.constants';
-import { AppDataSource } from '../database/dbConnection';
-import { Notification } from '../database/entities/Notification';
+import { INotification, Notification } from '../models/Notification';
 
 export default class NotificationRepository {
-  private static get repository() {
-    return AppDataSource.getRepository(Notification);
-  }
-
-  static async create(data: Partial<Notification>): Promise<Notification> {
-    const row = this.repository.create(data);
-    return await this.repository.save(row);
+  static async create(data: Partial<INotification>): Promise<INotification> {
+    return await Notification.create(data);
   }
 
   static async getNotificationsByUserId(
-    userId: string,
+    userId: string | Types.ObjectId,
     skip: number,
     limit: number
-  ): Promise<Notification[]> {
-    return await this.repository.find({
-      where: { userId, deletedAt: IsNull() },
-      order: { createdAt: 'DESC' },
-      skip,
-      take: limit,
-    });
+  ): Promise<INotification[]> {
+    return await Notification.find({ userId, deletedAt: null })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
   }
 
-  static async countNotificationsByUserId(userId: string): Promise<number> {
-    return await this.repository.count({
-      where: { userId, deletedAt: IsNull() },
-    });
+  static async countNotificationsByUserId(
+    userId: string | Types.ObjectId
+  ): Promise<number> {
+    return await Notification.countDocuments({ userId, deletedAt: null });
   }
 
-  static async countUnreadByUserId(userId: string): Promise<number> {
-    return await this.repository.count({
-      where: { userId, readAt: IsNull(), deletedAt: IsNull() },
+  static async countUnreadByUserId(
+    userId: string | Types.ObjectId
+  ): Promise<number> {
+    return await Notification.countDocuments({
+      userId,
+      readAt: null,
+      deletedAt: null,
     });
   }
 
   static async updateNotificationStatus(
-    id: string,
+    id: string | Types.ObjectId,
     status: NotificationStatus
-  ): Promise<void> {
-    await this.repository.update({ id }, { status });
+  ): Promise<UpdateWriteOpResult> {
+    return await Notification.updateOne({ _id: id }, { status });
   }
 
-  static async readNotificationsByUserId(userId: string): Promise<void> {
-    await this.repository.update(
-      { userId, readAt: IsNull(), deletedAt: IsNull() },
+  static async readNotificationsByUserId(
+    userId: string | Types.ObjectId
+  ): Promise<UpdateWriteOpResult> {
+    return await Notification.updateMany(
+      { userId, readAt: null, deletedAt: null },
       { readAt: new Date() }
     );
   }
 
   static async findNotification(
-    filters: FindOptionsWhere<Notification>
-  ): Promise<Notification | null> {
-    return await this.repository.findOne({ where: filters });
+    filters: FilterQuery<INotification>
+  ): Promise<INotification | null> {
+    return await Notification.findOne(filters);
   }
 }

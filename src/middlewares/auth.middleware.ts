@@ -4,8 +4,8 @@ import { Socket } from 'socket.io';
 
 import config from '../configs/common.config';
 import messagesConstants from '../constants/messages.constants';
-import { Users } from '../database/entities/Users';
 import { JwtPayload } from '../interfaces/user.interface';
+import { IUsers } from '../models/Users';
 import UserRepository from '../repositories/user.repository';
 import ApiResponse from '../utils/apiResponse';
 
@@ -14,11 +14,11 @@ import ApiResponse from '../utils/apiResponse';
  */
 declare module 'express-serve-static-core' {
   interface Request {
-    user?: Users | null;
+    user?: IUsers | null;
   }
 }
 
-export const validateUserFromToken = async (token: string): Promise<Users> => {
+export const validateUserFromToken = async (token: string): Promise<IUsers> => {
   const decoded = jwt.verify(token, config.jwt.secret) as JwtPayload;
   const user = await UserRepository.findById(decoded.id);
 
@@ -100,7 +100,7 @@ export type SocketAuthHandshake = {
 };
 
 export type SocketData = {
-  user?: Users;
+  user?: IUsers;
 };
 
 export type SocketNext = (error?: Error) => void;

@@ -1,7 +1,5 @@
 import { SocialLoginType } from '../constants/key.constants';
 import messagesConstants from '../constants/messages.constants';
-import { OTPMaster } from '../database/entities/OTPMaster';
-import { Users } from '../database/entities/Users';
 import {
   LoginInput,
   RefreshTokenInput,
@@ -11,6 +9,8 @@ import {
   SocialLoginInput,
   VerifyOtpInput,
 } from '../interfaces/user.interface';
+import { IOTPMaster } from '../models/OTPMaster';
+import { IUsers } from '../models/Users';
 import OtpRepository from '../repositories/otp.repository';
 import UserRepository from '../repositories/user.repository';
 import ApiResponse from '../utils/apiResponse';
@@ -23,7 +23,7 @@ import sendEmail from '../utils/sendEmail';
 /**
  * Remove sensitive fields from user object
  */
-const sanitizeUser = (user: Users) => {
+const sanitizeUser = (user: IUsers) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   const { password, ...safeUser } = user;
 
@@ -75,14 +75,14 @@ export default class AuthService {
     }
 
     const otp = CommonFunctions.generateOtp();
-    const otpData: Partial<OTPMaster> = { email, otp };
+    const otpData: Partial<IOTPMaster> = { email, otp };
 
     const existingOtp = await OtpRepository.findByEmail(email);
     if (existingOtp) {
-      await OtpRepository.updateOtp(existingOtp.id, otpData);
-    } else {
-      await OtpRepository.createOtp(otpData);
+      await OtpRepository.deleteOtp(existingOtp._id);
     }
+
+    await OtpRepository.createOtp(otpData);
 
     const emailContent = registerMail({
       name: name || 'User',
@@ -115,8 +115,8 @@ export default class AuthService {
       googleId,
       deviceType,
       deviceToken,
-      lat,
-      lng,
+      lat = 0,
+      lng = 0,
     } = body;
 
     const existingUser = await UserRepository.findByEmail(email);
@@ -154,11 +154,11 @@ export default class AuthService {
         return ApiResponse.badRequest(messagesConstants.INVALID_OTP);
       }
 
-      await OtpRepository.deleteOtp(otpRecord.id);
+      await OtpRepository.deleteOtp(otpRecord._id);
 
       hashedPassword = await BcryptjsUtil.hashPassword(password);
     } else {
-      let userBySocialId: Users | null = null;
+      let userBySocialId: IUsers | null = null;
       if (socialLoginType === SocialLoginType.GOOGLE && googleId) {
         userBySocialId = await UserRepository.findUser({ googleId });
       } else if (socialLoginType === SocialLoginType.APPLE && appleId) {
@@ -185,12 +185,14 @@ export default class AuthService {
       profilePicture: file?.filename,
       deviceType,
       deviceToken,
-      lat: lat !== undefined ? String(lat) : undefined,
-      lng: lng !== undefined ? String(lng) : undefined,
+      location: {
+        type: 'Point',
+        coordinates: [lng, lat],
+      },
     };
 
     const newUser = await UserRepository.createUser(userData);
-    const token = JwtUtil.generateToken({ id: newUser.id });
+    const token = JwtUtil.generateToken({ id: newUser._id.toString() });
 
     const result = { ...sanitizeUser(newUser), token };
 
@@ -230,11 +232,13 @@ export default class AuthService {
       return ApiResponse.badRequest(messagesConstants.INCORRECT_PASSWORD);
     }
 
-    const updatedUser = await UserRepository.updateUserById(user.id, {
+    const updatedUser = await UserRepository.updateUserById(user._id, {
       deviceType,
       deviceToken,
-      lat: String(body?.lat),
-      lng: String(body?.lng),
+      location: {
+        type: 'Point',
+        coordinates: [body?.lng ?? 0, body?.lat ?? 0],
+      },
     });
     if (!updatedUser) {
       return ApiResponse.notFound(messagesConstants.USER_NOT_REGISTERED);
@@ -263,7 +267,7 @@ export default class AuthService {
 
     const userByEmail = await UserRepository.findByEmail(email);
 
-    let userBySocialId: Users | null = null;
+    let userBySocialId: IUsers | null = null;
     if (socialLoginType === SocialLoginType.GOOGLE && googleId) {
       userBySocialId = await UserRepository.findUser({ googleId });
     } else if (socialLoginType === SocialLoginType.APPLE && appleId) {
@@ -275,12 +279,12 @@ export default class AuthService {
       return ApiResponse.notFound(messagesConstants.USER_NOT_REGISTERED);
     }
 
-    let targetUser: Users;
+    let targetUser: IUsers;
 
     if (userBySocialId) {
       // Scenario 2: Both exist
       if (userByEmail) {
-        if (userByEmail.id !== userBySocialId.id) {
+        if (userByEmail._id.toString() !== userBySocialId._id.toString()) {
           return ApiResponse.badRequest(
             messagesConstants.SOCIAL_ACCOUNT_LINKED_TO_OTHER_EMAIL
           );
@@ -331,11 +335,13 @@ export default class AuthService {
       targetUser = userByEmail;
     }
 
-    const updateData: Partial<Users> = {
+    const updateData: Partial<IUsers> = {
       deviceType,
       deviceToken,
-      lat: body.lat !== undefined ? String(body.lat) : undefined,
-      lng: body.lng !== undefined ? String(body.lng) : undefined,
+      location: {
+        type: 'Point',
+        coordinates: [body?.lng ?? 0, body?.lat ?? 0],
+      },
     };
 
     if (appleId) {
@@ -346,14 +352,14 @@ export default class AuthService {
     }
 
     const updatedUser = await UserRepository.updateUserById(
-      targetUser.id,
+      targetUser._id,
       updateData
     );
     if (!updatedUser) {
       return ApiResponse.notFound(messagesConstants.USER_NOT_REGISTERED);
     }
 
-    const token = JwtUtil.generateToken({ id: targetUser.id });
+    const token = JwtUtil.generateToken({ id: targetUser._id.toString() });
 
     const result = { ...sanitizeUser(updatedUser), token };
 
@@ -378,14 +384,14 @@ export default class AuthService {
     }
 
     const otp = CommonFunctions.generateOtp();
-    const otpData: Partial<OTPMaster> = { email, otp };
+    const otpData: Partial<IOTPMaster> = { email, otp };
 
     const existingOtp = await OtpRepository.findByEmail(email);
     if (existingOtp) {
-      await OtpRepository.updateOtp(existingOtp.id, otpData);
-    } else {
-      await OtpRepository.createOtp(otpData);
+      await OtpRepository.deleteOtp(existingOtp._id);
     }
+
+    await OtpRepository.createOtp(otpData);
 
     const emailContent = forgotPasswordMail({
       name: user.name,
@@ -418,9 +424,12 @@ export default class AuthService {
       return ApiResponse.badRequest(messagesConstants.INVALID_OTP);
     }
 
-    await OtpRepository.deleteOtp(otp.id);
+    await OtpRepository.deleteOtp(otp._id);
 
-    return ApiResponse.success({ id: user.id }, messagesConstants.OTP_VERIFIED);
+    return ApiResponse.success(
+      { _id: user._id },
+      messagesConstants.OTP_VERIFIED
+    );
   }
 
   /**
@@ -446,7 +455,7 @@ export default class AuthService {
     }
 
     const hashedPassword = await BcryptjsUtil.hashPassword(password);
-    await UserRepository.updateUserById(user.id, {
+    await UserRepository.updateUserById(user._id, {
       password: hashedPassword,
     });
 
@@ -469,13 +478,15 @@ export default class AuthService {
     }
 
     if (lat && lng) {
-      await UserRepository.updateUserById(user.id, {
-        lat: String(lat),
-        lng: String(lng),
+      await UserRepository.updateUserById(user._id, {
+        location: {
+          type: 'Point',
+          coordinates: [lng, lat],
+        },
       });
     }
 
-    const token = JwtUtil.generateToken({ id: user.id });
+    const token = JwtUtil.generateToken({ id: user._id.toString() });
 
     return ApiResponse.success(
       { token },

@@ -4,8 +4,9 @@ import {
   SocketEmitEvent,
 } from '../constants/key.constants';
 import messagesConstants from '../constants/messages.constants';
-import { Users } from '../database/entities/Users';
 import { GetNotificationsQuery } from '../interfaces/notification.interface';
+import { INotification } from '../models/Notification';
+import { IUsers } from '../models/Users';
 import NotificationRepository from '../repositories/notification.repository';
 import UserRepository from '../repositories/user.repository';
 import ApiResponse from '../utils/apiResponse';
@@ -17,7 +18,7 @@ const DEFAULT_LIMIT = 10;
 
 export default class NotificationService {
   static async getNotifications(
-    user: Users,
+    user: IUsers,
     query: GetNotificationsQuery
   ): Promise<ApiResponse> {
     const skip =
@@ -29,11 +30,11 @@ export default class NotificationService {
         ? Number(query.limit)
         : DEFAULT_LIMIT;
 
-    await NotificationRepository.readNotificationsByUserId(user.id);
+    await NotificationRepository.readNotificationsByUserId(user._id);
 
     const [notifications, total] = await Promise.all([
-      NotificationRepository.getNotificationsByUserId(user.id, skip, limit),
-      NotificationRepository.countNotificationsByUserId(user.id),
+      NotificationRepository.getNotificationsByUserId(user._id, skip, limit),
+      NotificationRepository.countNotificationsByUserId(user._id),
     ]);
 
     return ApiResponse.success(
@@ -61,7 +62,7 @@ export default class NotificationService {
       await sendFirebaseNotification(deviceToken, title, message, {
         ...data,
         type,
-        notificationId: createdNotification.id,
+        notificationId: createdNotification._id,
       });
   }
 

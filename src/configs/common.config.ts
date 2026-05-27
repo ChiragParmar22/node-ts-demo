@@ -22,11 +22,8 @@ const SERVER_URL = process.env.SERVER_URL || 'http://localhost:5050';
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 
 // DB Configuration
-const DB_HOST = process.env.DB_HOST || '';
-const DB_PORT: number = Number(process.env.DB_PORT || 5432);
-const DB_USERNAME = process.env.DB_USERNAME || '';
-const DB_PASSWORD = process.env.DB_PASSWORD || '';
-const DB_NAME = process.env.DB_NAME || '';
+const MONGO_URI =
+  process.env.MONGO_URI || 'mongodb://localhost:27017/nodeTsDemo';
 
 export default {
   APP_NAME: process.env.APP_NAME || 'NodeTsDemo',
@@ -43,11 +40,7 @@ export default {
 
   PASSWORD_ENCRYPT_LEVEL: Number(process.env.PASSWORD_ENCRYPT_LEVEL || 12),
 
-  DB_HOST,
-  DB_PORT,
-  DB_USERNAME,
-  DB_PASSWORD,
-  DB_NAME,
+  MONGO_URI,
 
   CLIENT_EMAIL: process.env.CLIENT_EMAIL || 'NodeTsDemo@gmail.com',
 
