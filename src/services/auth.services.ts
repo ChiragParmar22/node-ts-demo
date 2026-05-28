@@ -25,7 +25,7 @@ import sendEmail from '../utils/sendEmail';
  */
 const sanitizeUser = (user: IUsers) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-  const { password, ...safeUser } = user;
+  const { password, __v, deletedAt, deleteReason, ...safeUser } = user.toJSON();
 
   safeUser.profilePicture = safeUser.profilePicture
     ? CommonFunctions.getImageUrl(
@@ -194,7 +194,7 @@ export default class AuthService {
     const newUser = await UserRepository.createUser(userData);
     const token = JwtUtil.generateToken({ id: newUser._id.toString() });
 
-    const result = { ...sanitizeUser(newUser), token };
+    const result = { ...sanitizeUser(newUser as IUsers), token };
 
     return ApiResponse.created(result, messagesConstants.ACCOUNT_CREATED);
   }
@@ -460,12 +460,12 @@ export default class AuthService {
 
   /**
    * Handle refresh token
-   * @param body - refresh token input with userId
+   * @param body - refresh token input with id
    */
   static async refreshToken(body: RefreshTokenInput): Promise<ApiResponse> {
-    const { userId, lat, lng } = body;
+    const { id, lat, lng } = body;
 
-    const user = await UserRepository.findById(userId);
+    const user = await UserRepository.findById(id);
     if (!user) {
       return ApiResponse.notFound(messagesConstants.USER_NOT_FOUND);
     }

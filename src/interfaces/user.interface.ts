@@ -73,7 +73,7 @@ export interface ResetPasswordInput {
  * Refresh token input interface
  */
 export interface RefreshTokenInput {
-  userId: string;
+  id: string;
   lat?: number;
   lng?: number;
 }

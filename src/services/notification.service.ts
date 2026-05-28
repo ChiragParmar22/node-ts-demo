@@ -8,9 +8,9 @@ import messagesConstants from '../constants/messages.constants';
 import { GetNotificationsQuery } from '../interfaces/notification.interface';
 import { IUsers } from '../models/Users';
 import NotificationRepository from '../repositories/notification.repository';
-import UserRepository from '../repositories/user.repository';
+// import UserRepository from '../repositories/user.repository';
 import ApiResponse from '../utils/apiResponse';
-import sendFirebaseNotification from '../utils/pushNotification';
+// import sendFirebaseNotification from '../utils/pushNotification';
 import { emitSocketToUser } from '../utils/socket';
 
 const DEFAULT_SKIP = 0;
@@ -51,22 +51,22 @@ export default class NotificationService {
     data?: Record<string, unknown>;
     status?: NotificationStatus;
   }): Promise<void> {
-    const { userId, type, title, message, data = {} } = payload;
+    const { userId } = payload;
 
-    const createdNotification = await NotificationRepository.create({
+    await NotificationRepository.create({
       ...payload,
       userId: new Types.ObjectId(userId),
     });
 
-    const user = await UserRepository.findById(userId);
-    const deviceToken = user?.deviceToken;
+    // const user = await UserRepository.findById(userId);
+    // const deviceToken = user?.deviceToken;
 
-    if (deviceToken)
-      await sendFirebaseNotification(deviceToken, title, message, {
-        ...data,
-        type,
-        notificationId: createdNotification._id,
-      });
+    // if (deviceToken)
+    //   await sendFirebaseNotification(deviceToken, title, message, {
+    //     ...data,
+    //     type,
+    //     notificationId: createdNotification._id,
+    //   });
   }
 
   static async emitUnreadNotificationCount(userId: string): Promise<void> {

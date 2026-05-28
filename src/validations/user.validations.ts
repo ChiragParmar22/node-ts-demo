@@ -1,7 +1,9 @@
 import Joi from 'joi';
 
 import { DeviceType, SocialLoginType } from '../constants/key.constants';
-const uuidValidator = Joi.string().uuid();
+import messagesConstants from '../constants/messages.constants';
+
+const mongoIdValidator = Joi.string().hex().length(24);
 
 export default {
   sendOtpSchema: {
@@ -22,6 +24,13 @@ export default {
       socialLoginType: Joi.string()
         .valid(...Object.values(SocialLoginType))
         .required(),
+      socialId: Joi.string()
+        .trim()
+        .when('socialLoginType', {
+          not: SocialLoginType.EMAIL,
+          then: Joi.required(),
+          otherwise: Joi.optional().allow(null, ''),
+        }),
       password: Joi.string().when('socialLoginType', {
         is: SocialLoginType.EMAIL,
         then: Joi.required(),
@@ -31,13 +40,6 @@ export default {
         .length(4)
         .when('socialLoginType', {
           is: SocialLoginType.EMAIL,
-          then: Joi.required(),
-          otherwise: Joi.optional().allow(null, ''),
-        }),
-      socialId: Joi.string()
-        .trim()
-        .when('socialLoginType', {
-          not: SocialLoginType.EMAIL,
           then: Joi.required(),
           otherwise: Joi.optional().allow(null, ''),
         }),
@@ -63,6 +65,28 @@ export default {
     }),
   },
 
+  socialLoginSchema: {
+    body: Joi.object({
+      email: Joi.string().trim().email().lowercase().required(),
+      socialLoginType: Joi.string()
+        .valid(SocialLoginType.GOOGLE, SocialLoginType.APPLE)
+        .required(),
+      socialId: Joi.string()
+        .trim()
+        .when('socialLoginType', {
+          not: SocialLoginType.EMAIL,
+          then: Joi.required(),
+          otherwise: Joi.optional().allow(null, ''),
+        }),
+      deviceType: Joi.string()
+        .valid(DeviceType.iOS, DeviceType.android)
+        .required(),
+      deviceToken: Joi.string().trim().optional(),
+      lat: Joi.number().min(-90).max(90).allow(0).optional().default(0),
+      lng: Joi.number().min(-180).max(180).allow(0).optional().default(0),
+    }),
+  },
+
   verifyOtpSchema: {
     body: Joi.object({
       email: Joi.string().trim().email().lowercase().required(),
@@ -72,14 +96,20 @@ export default {
 
   resetPasswordSchema: {
     body: Joi.object({
-      id: uuidValidator.required(),
+      id: mongoIdValidator.required().messages({
+        'string.hex': messagesConstants.INVALID_USER_ID,
+        'string.length': messagesConstants.INVALID_USER_ID,
+      }),
       password: Joi.string().required(),
     }),
   },
 
   refreshTokenSchema: {
     body: Joi.object({
-      userId: uuidValidator.required(),
+      id: mongoIdValidator.required().messages({
+        'string.hex': messagesConstants.INVALID_USER_ID,
+        'string.length': messagesConstants.INVALID_USER_ID,
+      }),
       lat: Joi.number().min(-90).max(90).allow(0).optional().default(0),
       lng: Joi.number().min(-180).max(180).allow(0).optional().default(0),
     }),
@@ -107,27 +137,5 @@ export default {
 
   deleteAccountSchema: {
     body: Joi.object({ deleteReason: Joi.string().trim().min(2).required() }),
-  },
-
-  socialLoginSchema: {
-    body: Joi.object({
-      email: Joi.string().trim().email().lowercase().required(),
-      socialLoginType: Joi.string()
-        .valid(SocialLoginType.GOOGLE, SocialLoginType.APPLE)
-        .required(),
-      socialId: Joi.string()
-        .trim()
-        .when('socialLoginType', {
-          not: SocialLoginType.EMAIL,
-          then: Joi.required(),
-          otherwise: Joi.optional().allow(null, ''),
-        }),
-      deviceType: Joi.string()
-        .valid(DeviceType.iOS, DeviceType.android)
-        .required(),
-      deviceToken: Joi.string().trim().optional(),
-      lat: Joi.number().min(-90).max(90).allow(0).optional().default(0),
-      lng: Joi.number().min(-180).max(180).allow(0).optional().default(0),
-    }),
   },
 };

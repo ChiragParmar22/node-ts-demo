@@ -12,8 +12,14 @@ const OTPMasterSchema = new Schema<IOTPMaster>(
   {
     email: { type: String, required: true },
     otp: { type: String, required: true },
-    createdAt: { type: Date, required: true, default: Date.now },
-    expireAt: { type: Date, default: Date.now, index: { expires: '10m' } },
+    createdAt: { type: Date, default: Date.now },
+    expireAt: {
+      type: Date,
+      default() {
+        return new Date(Date.now() + 10 * 60 * 1000);
+      },
+      index: { expires: '10m' },
+    },
   },
   { collection: 'otpMaster' }
 );
