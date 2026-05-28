@@ -21,8 +21,7 @@ export interface RegisterInput {
   socialLoginType?: SocialLoginType;
   password?: string;
   otp?: string;
-  appleId?: string | null;
-  googleId?: string | null;
+  socialId?: string | null;
   deviceType: DeviceType.iOS | DeviceType.android;
   deviceToken?: string | null;
   lat?: number;
@@ -47,8 +46,7 @@ export interface LoginInput {
 export interface SocialLoginInput {
   email: string;
   socialLoginType: SocialLoginType;
-  appleId?: string | null;
-  googleId?: string | null;
+  socialId?: string | null;
   deviceType: DeviceType.iOS | DeviceType.android;
   deviceToken?: string | null;
   lat?: number;

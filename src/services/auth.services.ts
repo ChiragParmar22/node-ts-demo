@@ -111,8 +111,7 @@ export default class AuthService {
       socialLoginType,
       password,
       otp,
-      appleId,
-      googleId,
+      socialId,
       deviceType,
       deviceToken,
       lat = 0,
@@ -159,10 +158,12 @@ export default class AuthService {
       hashedPassword = await BcryptjsUtil.hashPassword(password);
     } else {
       let userBySocialId: IUsers | null = null;
-      if (socialLoginType === SocialLoginType.GOOGLE && googleId) {
-        userBySocialId = await UserRepository.findUser({ googleId });
-      } else if (socialLoginType === SocialLoginType.APPLE && appleId) {
-        userBySocialId = await UserRepository.findUser({ appleId });
+      if (socialId) {
+        if (socialLoginType === SocialLoginType.GOOGLE) {
+          userBySocialId = await UserRepository.findUser({ socialId });
+        } else if (socialLoginType === SocialLoginType.APPLE) {
+          userBySocialId = await UserRepository.findUser({ socialId });
+        }
       }
 
       if (userBySocialId) {
@@ -179,9 +180,8 @@ export default class AuthService {
       phoneNumber,
       socialLoginType,
       password: hashedPassword,
-      appleId: socialLoginType === SocialLoginType.APPLE ? appleId : undefined,
-      googleId:
-        socialLoginType === SocialLoginType.GOOGLE ? googleId : undefined,
+      socialId:
+        socialLoginType !== SocialLoginType.EMAIL ? socialId : undefined,
       profilePicture: file?.filename,
       deviceType,
       deviceToken,
@@ -256,22 +256,18 @@ export default class AuthService {
    * @param body - user social login credentials
    */
   static async socialLogin(body: SocialLoginInput): Promise<ApiResponse> {
-    const {
-      email,
-      socialLoginType,
-      appleId,
-      googleId,
-      deviceType,
-      deviceToken,
-    } = body;
+    const { email, socialLoginType, socialId, deviceType, deviceToken } = body;
 
     const userByEmail = await UserRepository.findByEmail(email);
 
     let userBySocialId: IUsers | null = null;
-    if (socialLoginType === SocialLoginType.GOOGLE && googleId) {
-      userBySocialId = await UserRepository.findUser({ googleId });
-    } else if (socialLoginType === SocialLoginType.APPLE && appleId) {
-      userBySocialId = await UserRepository.findUser({ appleId });
+
+    if (socialId) {
+      if (socialLoginType === SocialLoginType.GOOGLE) {
+        userBySocialId = await UserRepository.findUser({ socialId });
+      } else if (socialLoginType === SocialLoginType.APPLE) {
+        userBySocialId = await UserRepository.findUser({ socialId });
+      }
     }
 
     // Scenario 1: Neither exists
@@ -306,12 +302,12 @@ export default class AuthService {
       }
 
       // Check if this email is already linked to a different social account of the same type
-      if (socialLoginType === SocialLoginType.GOOGLE && userByEmail.googleId) {
+      if (socialLoginType === SocialLoginType.GOOGLE && userByEmail.socialId) {
         return ApiResponse.badRequest(
           messagesConstants.EMAIL_ALREADY_LINKED_TO_OTHER_GOOGLE
         );
       }
-      if (socialLoginType === SocialLoginType.APPLE && userByEmail.appleId) {
+      if (socialLoginType === SocialLoginType.APPLE && userByEmail.socialId) {
         return ApiResponse.badRequest(
           messagesConstants.EMAIL_ALREADY_LINKED_TO_OTHER_APPLE
         );
@@ -344,11 +340,8 @@ export default class AuthService {
       },
     };
 
-    if (appleId) {
-      updateData.appleId = appleId;
-    }
-    if (googleId) {
-      updateData.googleId = googleId;
+    if (socialId) {
+      updateData.socialId = socialId;
     }
 
     const updatedUser = await UserRepository.updateUserById(

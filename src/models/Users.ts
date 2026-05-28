@@ -11,8 +11,7 @@ export interface IUsers extends Document {
   deviceType: DeviceType | null;
   deviceToken: string | null;
   socialLoginType: SocialLoginType;
-  appleId: string | null;
-  googleId: string | null;
+  socialId: string | null;
   password: string | null;
   profilePicture: string | null;
   socketId: string | null;
@@ -40,8 +39,7 @@ const UsersSchema = new Schema<IUsers>(
       enum: Object.values(SocialLoginType),
       required: true,
     },
-    appleId: { type: String, default: null },
-    googleId: { type: String, default: null },
+    socialId: { type: String, default: null },
     password: { type: String, default: null },
     profilePicture: { type: String, default: null },
     socketId: { type: String, default: null },

@@ -34,17 +34,10 @@ export default {
           then: Joi.required(),
           otherwise: Joi.optional().allow(null, ''),
         }),
-      appleId: Joi.string()
+      socialId: Joi.string()
         .trim()
         .when('socialLoginType', {
-          is: SocialLoginType.APPLE,
-          then: Joi.required(),
-          otherwise: Joi.optional().allow(null, ''),
-        }),
-      googleId: Joi.string()
-        .trim()
-        .when('socialLoginType', {
-          is: SocialLoginType.GOOGLE,
+          not: SocialLoginType.EMAIL,
           then: Joi.required(),
           otherwise: Joi.optional().allow(null, ''),
         }),
@@ -122,17 +115,10 @@ export default {
       socialLoginType: Joi.string()
         .valid(SocialLoginType.GOOGLE, SocialLoginType.APPLE)
         .required(),
-      appleId: Joi.string()
+      socialId: Joi.string()
         .trim()
         .when('socialLoginType', {
-          is: SocialLoginType.APPLE,
-          then: Joi.required(),
-          otherwise: Joi.optional().allow(null, ''),
-        }),
-      googleId: Joi.string()
-        .trim()
-        .when('socialLoginType', {
-          is: SocialLoginType.GOOGLE,
+          not: SocialLoginType.EMAIL,
           then: Joi.required(),
           otherwise: Joi.optional().allow(null, ''),
         }),
