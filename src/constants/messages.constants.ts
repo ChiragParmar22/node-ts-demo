@@ -99,4 +99,15 @@ export default {
   SOCIAL_ACCOUNT_ALREADY_REGISTERED:
     'This social account is already registered. Please login.',
   PASSWORD_REQUIRED_FOR_EMAIL_LOGIN: 'Password is required for email login.',
+
+  NO_FILE_UPLOADED: 'No file uploaded.',
+  FILE_TYPE_MISMATCH: (fileMime: string, chatType: string) =>
+    `Uploaded file type (${fileMime}) does not match the specified chatType (${chatType}).`,
+  FILE_UPLOADED_SUCCESSFULLY: 'File uploaded successfully.',
+  RECEIVER_NOT_FOUND: 'Receiver user not found.',
+  ONLY_TEXT_EDIT_ALLOWED: 'Only text messages can be updated or edited.',
+  INVALID_RECEIVER_ID:
+    'Invalid receiverId format. Must be a 24-character hex string.',
+  INVALID_MESSAGE_ID:
+    'Invalid messageId format. Must be a 24-character hex string.',
 };

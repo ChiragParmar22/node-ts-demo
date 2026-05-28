@@ -9,6 +9,14 @@ export enum SocialLoginType {
   APPLE = 'apple',
 }
 
+export enum ChatType {
+  TEXT = 'text',
+  FILE = 'file',
+  IMAGE = 'image',
+  AUDIO = 'audio',
+  VIDEO = 'video',
+}
+
 export enum NotificationType {}
 
 export enum NotificationStatus {
@@ -31,6 +39,9 @@ export enum SocketListenEvent {
   DISCONNECT = 'disconnect',
   ROOM_JOIN = 'roomJoin',
   ROOM_LEAVE = 'roomLeave',
+  SEND_MESSAGE = 'sendMessage',
+  UPDATE_MESSAGE = 'updateMessage',
+  DELETE_MESSAGE = 'deleteMessage',
 }
 
 /**
@@ -41,6 +52,10 @@ export const SocketEmitEvent = {
   UNREAD_NOTIFICATION_COUNT: 'unreadNotificationCount',
   SET_ROOM_JOIN: 'setRoomJoin',
   SET_ROOM_LEAVE: 'setRoomLeave',
+  SET_SEND_MESSAGE: 'setSendMessage',
+  SET_UPDATE_MESSAGE: 'setUpdateMessage',
+  SET_DELETE_MESSAGE: 'setDeleteMessage',
+  SET_MESSAGE_LIST: 'setMessageList',
 } as const;
 
 export type SocketEmitEventName =
