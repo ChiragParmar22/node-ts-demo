@@ -120,12 +120,10 @@ export const socketAuthMiddleware = async (
   next: SocketNext
 ): Promise<void> => {
   try {
-    const auth = socket.handshake.auth as SocketAuthHandshake;
-    const tokenFromAuth = auth.token;
     const tokenFromHeader = extractTokenFromAuthorization(
       socket.handshake.headers.authorization
     );
-    const token = tokenFromAuth ?? tokenFromHeader;
+    const token = tokenFromHeader;
 
     if (!token) {
       return next(new Error(messagesConstants.INVALID_TOKEN));

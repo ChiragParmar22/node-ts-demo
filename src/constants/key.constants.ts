@@ -49,13 +49,13 @@ export enum SocketListenEvent {
  * Add keys when you introduce push-style events.
  */
 export const SocketEmitEvent = {
-  UNREAD_NOTIFICATION_COUNT: 'unreadNotificationCount',
   SET_ROOM_JOIN: 'setRoomJoin',
   SET_ROOM_LEAVE: 'setRoomLeave',
   SET_SEND_MESSAGE: 'setSendMessage',
   SET_UPDATE_MESSAGE: 'setUpdateMessage',
   SET_DELETE_MESSAGE: 'setDeleteMessage',
   SET_MESSAGE_LIST: 'setMessageList',
+  UNREAD_NOTIFICATION_COUNT: 'unreadNotificationCount',
 } as const;
 
 export type SocketEmitEventName =

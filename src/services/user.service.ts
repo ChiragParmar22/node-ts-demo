@@ -19,7 +19,7 @@ import CommonFunctions from '../utils/commonFunctions';
  */
 const sanitizeUser = (user: IUsers) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-  const { password, ...safeUser } = user;
+  const { password, __v, deletedAt, deleteReason, ...safeUser } = user.toJSON();
 
   safeUser.profilePicture = safeUser.profilePicture
     ? CommonFunctions.getImageUrl(
@@ -112,7 +112,9 @@ export default class UserService {
       user.password
     );
     if (!isCurrentPasswordCorrect) {
-      return ApiResponse.badRequest(messagesConstants.INCORRECT_PASSWORD);
+      return ApiResponse.badRequest(
+        messagesConstants.CURRENT_PASSWORD_INCORRECT
+      );
     }
 
     const isPasswordSame = await BcryptjsUtil.comparePassword(

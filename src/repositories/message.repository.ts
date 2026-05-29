@@ -54,7 +54,7 @@ export default class MessageRepository {
   ): Promise<IMessages | null> {
     return await Messages.findByIdAndUpdate(
       id,
-      { deletedAt: new Date(), updatedAt: new Date() },
+      { isDeleted: true, updatedAt: new Date() },
       { new: true }
     );
   }
@@ -63,5 +63,25 @@ export default class MessageRepository {
     filters: FilterQuery<IMessages>
   ): Promise<IMessages | null> {
     return await Messages.findOne({ ...filters, deletedAt: null });
+  }
+
+  static async getAllMessages(
+    filter: FilterQuery<IMessages>,
+    skip?: number,
+    limit?: number
+  ): Promise<IMessages[]> {
+    const query = Messages.find(filter).sort({ createdAt: -1 });
+
+    if (skip !== undefined && limit !== undefined) {
+      query.skip(skip).limit(limit);
+    }
+
+    return await query;
+  }
+
+  static async countAllMessages(
+    filter: FilterQuery<IMessages>
+  ): Promise<number> {
+    return await Messages.countDocuments(filter);
   }
 }

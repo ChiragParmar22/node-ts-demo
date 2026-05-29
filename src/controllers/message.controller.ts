@@ -4,6 +4,9 @@ import fs from 'fs';
 import config from '../configs/common.config';
 import { ChatType } from '../constants/key.constants';
 import messagesConstants from '../constants/messages.constants';
+import { GetMessagesQuery } from '../interfaces/message.interface';
+import { IUsers } from '../models/Users';
+import MessageService from '../services/message.service';
 import ApiResponse from '../utils/apiResponse';
 
 export default class MessageController {
@@ -72,6 +75,25 @@ export default class MessageController {
           console.error('Failed to delete file on error cleanup:', unlinkErr);
         }
       }
+      return next(error);
+    }
+  }
+
+  /**
+   * Get all messages with skip, limit, and search functionality
+   */
+  static async getMessages(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<unknown> {
+    try {
+      const result = await MessageService.getMessages(
+        request.user as IUsers,
+        request.query as unknown as GetMessagesQuery
+      );
+      return response.status(result.statusCode).json(result);
+    } catch (error: unknown) {
       return next(error);
     }
   }

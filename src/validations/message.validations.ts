@@ -38,4 +38,12 @@ export default {
         .required(),
     }),
   },
+
+  getMessagesSchema: {
+    query: Joi.object({
+      skip: Joi.number().integer().min(0).optional(),
+      limit: Joi.number().integer().min(1).max(100).optional(),
+      search: Joi.string().trim().allow('').optional(),
+    }),
+  },
 };

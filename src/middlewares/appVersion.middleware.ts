@@ -13,12 +13,23 @@ const getHeaderValue = (header: string | string[] | undefined): string => {
   return header?.trim() ?? '';
 };
 
+const bypassedApis = ['/api/contactUs'];
+
 export default async (
   request: Request,
   response: Response,
   next: NextFunction
 ): Promise<void | Response> => {
   try {
+    const isBypassed = bypassedApis.some((api) => {
+      return request.path === api || request.path.startsWith(`${api}/`);
+    });
+
+    if (isBypassed) {
+      next();
+      return;
+    }
+
     const deviceTypeHeader = getHeaderValue(request.headers.devicetype);
     const versionCodeHeader = getHeaderValue(request.headers.versioncode);
 

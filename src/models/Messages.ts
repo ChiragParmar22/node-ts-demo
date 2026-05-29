@@ -10,6 +10,7 @@ export interface IMessages extends Document {
   chatType: ChatType;
   message: string;
   isSeen: boolean;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
@@ -27,11 +28,26 @@ const MessagesSchema = new Schema<IMessages>(
     },
     message: { type: String, required: true },
     isSeen: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     deletedAt: { type: Date, default: null },
   },
-  { collection: 'messages' }
+  {
+    collection: 'messages',
+    toJSON: {
+      transform: (_doc, ret) => {
+        if (ret.isDeleted) ret.message = '';
+        return ret;
+      },
+    },
+    toObject: {
+      transform: (_doc, ret) => {
+        if (ret.isDeleted) ret.message = '';
+        return ret;
+      },
+    },
+  }
 );
 
 export const Messages = mongoose.model<IMessages>('messages', MessagesSchema);

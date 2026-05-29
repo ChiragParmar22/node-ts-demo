@@ -71,6 +71,7 @@ export default {
 
   USER_NOT_FOUND: 'User not found.',
   PROFILE_UPDATED_SUCCESSFULLY: 'Profile updated successfully.',
+  CURRENT_PASSWORD_INCORRECT: 'Your current password is incorrect.',
   PASSWORD_CHANGED_SUCCESSFULLY: 'Password changed successfully.',
   PROFILE_FETCHED_SUCCESSFULLY: 'Profile fetched successfully.',
   ACCOUNT_DELETED_SUCCESSFULLY: 'Account deleted successfully.',
@@ -80,6 +81,7 @@ export default {
     'Thank you for reaching out to us. We will get back to you shortly.',
 
   NOTIFICATIONS_FETCHED_SUCCESSFULLY: 'Notifications fetched successfully.',
+  MESSAGES_FETCHED_SUCCESSFULLY: 'Messages fetched successfully.',
   UNREAD_NOTIFICATION_COUNT_FETCHED_SUCCESSFULLY:
     'Unread notification count fetched successfully.',
 

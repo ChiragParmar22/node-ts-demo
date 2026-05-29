@@ -45,4 +45,10 @@ messageRoutes.post(
   MessageController.uploadFile
 );
 
+messageRoutes.get(
+  '/',
+  validateRequest(messageValidations.getMessagesSchema),
+  MessageController.getMessages
+);
+
 export default messageRoutes;

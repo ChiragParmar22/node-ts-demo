@@ -38,7 +38,7 @@ export default class NotificationService {
     ]);
 
     return ApiResponse.success(
-      { notifications, skip, limit, total },
+      { skip, limit, total, notifications },
       messagesConstants.NOTIFICATIONS_FETCHED_SUCCESSFULLY
     );
   }
