@@ -67,7 +67,15 @@ export default {
 
   socialLoginSchema: {
     body: Joi.object({
-      email: Joi.string().trim().email().lowercase().required(),
+      email: Joi.string()
+        .trim()
+        .email()
+        .lowercase()
+        .when('socialLoginType', {
+          is: SocialLoginType.APPLE,
+          then: Joi.optional().allow(null, ''),
+          otherwise: Joi.required(),
+        }),
       socialLoginType: Joi.string()
         .valid(SocialLoginType.GOOGLE, SocialLoginType.APPLE)
         .required(),

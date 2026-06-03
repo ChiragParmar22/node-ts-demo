@@ -101,6 +101,7 @@ export default {
   SOCIAL_ACCOUNT_ALREADY_REGISTERED:
     'This social account is already registered. Please login.',
   PASSWORD_REQUIRED_FOR_EMAIL_LOGIN: 'Password is required for email login.',
+  EMAIL_REQUIRED_FOR_LOGIN: 'Email is required for login.',
 
   NO_FILE_UPLOADED: 'No file uploaded.',
   FILE_TYPE_MISMATCH: (fileMime: string, chatType: string) =>

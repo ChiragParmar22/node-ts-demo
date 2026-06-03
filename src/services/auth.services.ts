@@ -11,6 +11,7 @@ import {
 } from '../interfaces/user.interface';
 import { IOTPMaster } from '../models/OTPMaster';
 import { IUsers } from '../models/Users';
+import AppleUsersRepository from '../repositories/appleUsers.repository';
 import OtpRepository from '../repositories/otp.repository';
 import UserRepository from '../repositories/user.repository';
 import ApiResponse from '../utils/apiResponse';
@@ -192,6 +193,11 @@ export default class AuthService {
     };
 
     const newUser = await UserRepository.createUser(userData);
+
+    if (socialLoginType === SocialLoginType.APPLE && socialId) {
+      await AppleUsersRepository.upsertByAppleId(socialId, email);
+    }
+
     const token = JwtUtil.generateToken({ id: newUser._id.toString() });
 
     const result = { ...sanitizeUser(newUser as IUsers), token };
@@ -256,7 +262,23 @@ export default class AuthService {
    * @param body - user social login credentials
    */
   static async socialLogin(body: SocialLoginInput): Promise<ApiResponse> {
-    const { email, socialLoginType, socialId, deviceType, deviceToken } = body;
+    let { email } = body;
+    const { socialLoginType, socialId, deviceType, deviceToken } = body;
+
+    if (socialLoginType === SocialLoginType.APPLE && socialId) {
+      if (email) {
+        await AppleUsersRepository.upsertByAppleId(socialId, email);
+      } else {
+        const appleUser = await AppleUsersRepository.findByAppleId(socialId);
+        if (!appleUser) {
+          return ApiResponse.notFound(messagesConstants.USER_NOT_REGISTERED);
+        }
+        email = appleUser.email;
+      }
+    }
+
+    if (!email)
+      return ApiResponse.badRequest(messagesConstants.EMAIL_REQUIRED_FOR_LOGIN);
 
     const userByEmail = await UserRepository.findByEmail(email);
 

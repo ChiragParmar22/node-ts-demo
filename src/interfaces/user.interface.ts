@@ -44,7 +44,7 @@ export interface LoginInput {
  * Social login input interface
  */
 export interface SocialLoginInput {
-  email: string;
+  email?: string | null;
   socialLoginType: SocialLoginType;
   socialId?: string | null;
   deviceType: DeviceType.iOS | DeviceType.android;
