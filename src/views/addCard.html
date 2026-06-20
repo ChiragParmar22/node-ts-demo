@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Card</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        background: linear-gradient(
+          135deg,
+          #0f0c29 0%,
+          #302b63 50%,
+          #24243e 100%
+        );
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .card-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 40px;
+        width: 100%;
+        max-width: 460px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      }
+
+      .card-header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .card-header h1 {
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .card-header p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+      }
+
+      .form-group label {
+        display: block;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      #card-element {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 16px;
+        transition:
+          border-color 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+
+      #card-element:hover {
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      #card-element.StripeElement--focus {
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+      }
+
+      #card-element.StripeElement--invalid {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+      }
+
+      #card-errors {
+        color: #ef4444;
+        font-size: 13px;
+        margin-top: 8px;
+        min-height: 20px;
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .submit-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+      }
+
+      .submit-btn:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .submit-btn .spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        margin: 0 auto;
+      }
+
+      .submit-btn.loading .btn-text {
+        display: none;
+      }
+
+      .submit-btn.loading .spinner {
+        display: block;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .success-message {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-radius: 12px;
+        margin-top: 16px;
+      }
+
+      .success-message .icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+      }
+
+      .success-message h3 {
+        color: #22c55e;
+        font-size: 18px;
+        margin-bottom: 4px;
+      }
+
+      .success-message p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+      }
+
+      .error-message {
+        display: none;
+        text-align: center;
+        padding: 16px;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 12px;
+        margin-top: 16px;
+        color: #ef4444;
+        font-size: 14px;
+      }
+
+      .token-display-container {
+        margin-top: 16px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .token-value {
+        color: #a78bfa;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        font-weight: 600;
+        overflow-x: auto;
+        white-space: nowrap;
+        flex-grow: 1;
+        text-align: left;
+      }
+
+      .copy-btn {
+        background: #7c3aed;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+      }
+
+      .copy-btn:hover {
+        background: #6d28d9;
+        transform: translateY(-1px);
+      }
+
+      .copy-btn:active {
+        transform: translateY(0);
+      }
+
+      .secure-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 24px;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 12px;
+      }
+
+      .secure-badge svg {
+        width: 14px;
+        height: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card-container">
+      <div class="card-header">
+        <h1>Add Card</h1>
+        <p>Securely add your payment method</p>
+      </div>
+
+      <form id="card-form">
+        <div class="form-group">
+          <label>Card Details</label>
+          <div id="card-element"></div>
+          <div id="card-errors" role="alert"></div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          <span class="btn-text">Generate Stripe Token</span>
+          <div class="spinner"></div>
+        </button>
+      </form>
+
+      <div class="success-message" id="success-message">
+        <h3>Stripe Token Generated!</h3>
+        <p>Copy the token below to call your API manually:</p>
+        <div class="token-display-container">
+          <span class="token-value" id="stripe-token-val"></span>
+          <button class="copy-btn" id="copy-btn-el" type="button">Copy</button>
+        </div>
+      </div>
+
+      <div class="error-message" id="error-message"></div>
+
+      <div class="secure-badge">
+        <svg fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        Secured by Stripe
+      </div>
+    </div>
+
+    <script>
+      // Stripe publishable key is injected by the server
+      const STRIPE_PUBLISHABLE_KEY = '{{STRIPE_PUBLISHABLE_KEY}}';
+
+      const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+      const elements = stripe.elements();
+
+      const style = {
+        base: {
+          color: '#ffffff',
+          fontFamily: "'Inter', -apple-system, sans-serif",
+          fontSize: '16px',
+          '::placeholder': {
+            color: 'rgba(255, 255, 255, 0.3)',
+          },
+        },
+        invalid: {
+          color: '#ef4444',
+        },
+      };
+
+      const cardElement = elements.create('card', { style });
+      cardElement.mount('#card-element');
+
+      // Handle real-time validation errors
+      cardElement.on('change', function (event) {
+        const errorDiv = document.getElementById('card-errors');
+        if (event.error) {
+          errorDiv.textContent = event.error.message;
+        } else {
+          errorDiv.textContent = '';
+        }
+      });
+
+      // Handle form submission
+      const form = document.getElementById('card-form');
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const submitBtn = document.getElementById('submit-btn');
+        const successMessage = document.getElementById('success-message');
+        const errorMessage = document.getElementById('error-message');
+
+        // Reset messages
+        successMessage.style.display = 'none';
+        errorMessage.style.display = 'none';
+
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+
+        // Create token using Stripe.js
+        const { token, error } = await stripe.createToken(cardElement);
+
+        if (error) {
+          document.getElementById('card-errors').textContent = error.message;
+          submitBtn.classList.remove('loading');
+          submitBtn.disabled = false;
+          return;
+        }
+
+        // Show token and success message
+        document.getElementById('stripe-token-val').textContent = token.id;
+        form.style.display = 'none';
+        successMessage.style.display = 'block';
+
+        // Setup copy button
+        const copyBtn = document.getElementById('copy-btn-el');
+        copyBtn.addEventListener('click', async function () {
+          try {
+            await navigator.clipboard.writeText(token.id);
+            copyBtn.textContent = 'Copied!';
+            copyBtn.style.background = '#22c55e';
+            setTimeout(() => {
+              copyBtn.textContent = 'Copy';
+              copyBtn.style.background = '#7c3aed';
+            }, 2000);
+          } catch (err) {
+            console.error('Failed to copy token:', err);
+          }
+        });
+
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      });
+    </script>
+  </body>
+</html>

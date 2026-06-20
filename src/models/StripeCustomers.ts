@@ -12,6 +12,7 @@ export interface IStripeCustomers extends Document {
   country: string | null;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 const StripeCustomersSchema = new Schema<IStripeCustomers>(
@@ -26,6 +27,7 @@ const StripeCustomersSchema = new Schema<IStripeCustomers>(
     country: { type: String, default: null },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
+    deletedAt: { type: Date, default: null },
   },
   { collection: 'stripeCustomers' }
 );

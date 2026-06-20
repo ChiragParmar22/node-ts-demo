@@ -16,8 +16,10 @@ export default (app: Application): void => {
         directives: {
           defaultSrc: ["'self'"], // Blocks all resources by default unless explicitly allowed
           styleSrc: ["'self'", "'unsafe-inline'"], // Allows CSS from your own domain // 'unsafe-inline' allows inline styles (e.g. style="color:red")
-          scriptSrc: ["'self'"], // Only allows JavaScript files from your own domain
+          scriptSrc: ["'self'", "'unsafe-inline'", 'https://js.stripe.com'], // Allows Stripe.js and inline scripts for the add card page
           imgSrc: ["'self'", 'data:', 'https:'], // Allows images from your own domain // data: allows base64 encoded images // https: allows images from any HTTPS source
+          frameSrc: ["'self'", 'https://js.stripe.com'], // Allows Stripe iframes for card elements
+          connectSrc: ["'self'", 'https://api.stripe.com'], // Allows fetch/XHR to Stripe API
         },
       },
       hsts: {

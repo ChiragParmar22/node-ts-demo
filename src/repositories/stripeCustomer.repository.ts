@@ -14,7 +14,7 @@ export default class StripeCustomerRepository {
     data: Partial<IStripeCustomers>
   ): Promise<IStripeCustomers | null> {
     return await StripeCustomers.findOneAndUpdate(
-      { userId },
+      { userId, deletedAt: null },
       { ...data, updatedAt: new Date() },
       { new: true }
     );
@@ -23,13 +23,16 @@ export default class StripeCustomerRepository {
   static async getCustomerByUserId(
     userId: string | Types.ObjectId
   ): Promise<IStripeCustomers | null> {
-    return await StripeCustomers.findOne({ userId });
+    return await StripeCustomers.findOne({ userId, deletedAt: null });
   }
 
   static async deleteCustomerById(
     userId: string | Types.ObjectId
-  ): Promise<boolean> {
-    const deleted = await StripeCustomers.deleteOne({ userId });
-    return deleted.deletedCount === 1;
+  ): Promise<IStripeCustomers | null> {
+    return await StripeCustomers.findOneAndUpdate(
+      { userId, deletedAt: null },
+      { deletedAt: new Date() },
+      { new: true }
+    );
   }
 }

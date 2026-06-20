@@ -14,6 +14,7 @@ export interface IUsers extends Document {
   profilePicture: string | null;
   socketId: string | null;
   location: { type: string; coordinates: number[] };
+  walletBalance: number;
   deleteReason: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -39,6 +40,7 @@ const UsersSchema = new Schema<IUsers>(
       type: { type: String, enum: ['Point'] },
       coordinates: { type: [Number], index: '2dsphere' },
     },
+    walletBalance: { type: Number, default: 0 },
     deleteReason: { type: String, default: null },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },

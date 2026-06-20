@@ -13,7 +13,11 @@ const getHeaderValue = (header: string | string[] | undefined): string => {
   return header?.trim() ?? '';
 };
 
-const bypassedApis = ['/api/contactUs'];
+const bypassedApis = [
+  '/api/contactUs',
+  '/api/stripe/card/addCard',
+  '/api/stripe/card/add',
+];
 
 export default async (
   request: Request,

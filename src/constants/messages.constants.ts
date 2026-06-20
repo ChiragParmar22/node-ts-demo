@@ -124,4 +124,11 @@ export default {
   STRIPE_CUSTOMER_NOT_FOUND: 'Stripe customer not found.',
   STRIPE_CUSTOMER_ALREADY_EXISTS:
     'Stripe customer already exists for this user.',
+
+  STRIPE_CARD_ADDED: 'Card added successfully.',
+  STRIPE_CARD_FETCHED: 'Card fetched successfully.',
+  STRIPE_CARDS_FETCHED: 'Cards fetched successfully.',
+  STRIPE_CARD_DELETED: 'Card deleted successfully.',
+  STRIPE_CARD_NOT_FOUND: 'Card not found.',
+  STRIPE_CARD_PRIMARY_UPDATED: 'Primary card updated successfully.',
 };
