@@ -17,6 +17,7 @@ const bypassedApis = [
   '/api/contactUs',
   '/api/stripe/card/addCard',
   '/api/stripe/card/add',
+  '/api/stripe/webhook',
 ];
 
 export default async (

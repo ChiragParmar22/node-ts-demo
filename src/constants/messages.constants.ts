@@ -131,4 +131,6 @@ export default {
   STRIPE_CARD_DELETED: 'Card deleted successfully.',
   STRIPE_CARD_NOT_FOUND: 'Card not found.',
   STRIPE_CARD_PRIMARY_UPDATED: 'Primary card updated successfully.',
+  STRIPE_PAYMENT_SUCCESS: 'Payment processed successfully.',
+  STRIPE_PAYMENT_FAILED: 'Payment failed.',
 };

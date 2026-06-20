@@ -102,4 +102,13 @@ export default class StripeService {
       default_source: cardId,
     });
   }
+
+  /**
+   * Create and confirm a PaymentIntent on Stripe
+   */
+  static async createPaymentIntent(
+    params: Stripe.PaymentIntentCreateParams
+  ): Promise<Stripe.PaymentIntent> {
+    return await stripeClient.paymentIntents.create(params);
+  }
 }

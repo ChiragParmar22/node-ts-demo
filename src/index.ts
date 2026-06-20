@@ -38,7 +38,20 @@ setupSecurity(app);
 
 // Body parsers
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.json({ limit: '10mb' }));
+app.use(
+  express.json({
+    limit: '10mb',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    verify: (request: any, _response: any, buf: Buffer) => {
+      if (
+        request.originalUrl &&
+        request.originalUrl.startsWith('/api/stripe/webhook')
+      ) {
+        request.rawBody = buf;
+      }
+    },
+  })
+);
 
 // Static files
 app.use('/public', express.static(path.join(__dirname, '..', 'src', 'public')));

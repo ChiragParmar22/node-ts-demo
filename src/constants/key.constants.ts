@@ -60,3 +60,15 @@ export const SocketEmitEvent = {
 
 export type SocketEmitEventName =
   (typeof SocketEmitEvent)[keyof typeof SocketEmitEvent];
+
+export enum TransactionStatus {
+  PENDING = 'pending',
+  SUCCEEDED = 'succeeded',
+  FAILED = 'failed',
+  REFUNDED = 'refunded',
+}
+
+export enum PaymentMethod {
+  CARD = 'card',
+  BANK = 'bank',
+}

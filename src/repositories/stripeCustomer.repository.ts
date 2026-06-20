@@ -26,6 +26,12 @@ export default class StripeCustomerRepository {
     return await StripeCustomers.findOne({ userId, deletedAt: null });
   }
 
+  static async getCustomerByStripeCustomerId(
+    stripeCustomerId: string
+  ): Promise<IStripeCustomers | null> {
+    return await StripeCustomers.findOne({ stripeCustomerId, deletedAt: null });
+  }
+
   static async deleteCustomerById(
     userId: string | Types.ObjectId
   ): Promise<IStripeCustomers | null> {
