@@ -36,6 +36,9 @@ export default {
   jwt: {
     secret: process.env.JWT_SECRET as Secret,
     expiresIn: (process.env.JWT_EXPIRES_IN || '12h') as string | number,
+    refreshExpiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as
+      | string
+      | number,
   },
 
   PASSWORD_ENCRYPT_LEVEL: Number(process.env.PASSWORD_ENCRYPT_LEVEL || 12),

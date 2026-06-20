@@ -1,9 +1,8 @@
 import Joi from 'joi';
 
 import { DeviceType, SocialLoginType } from '../constants/key.constants';
-import messagesConstants from '../constants/messages.constants';
 
-const mongoIdValidator = Joi.string().hex().length(24);
+const passwordSchema = Joi.string().min(8).max(128).required();
 
 export default {
   sendOtpSchema: {
@@ -33,11 +32,12 @@ export default {
         }),
       password: Joi.string().when('socialLoginType', {
         is: SocialLoginType.EMAIL,
-        then: Joi.required(),
+        then: passwordSchema,
         otherwise: Joi.optional().allow(null, ''),
       }),
       otp: Joi.string()
-        .length(4)
+        .length(6)
+        .pattern(/^[0-9]+$/)
         .when('socialLoginType', {
           is: SocialLoginType.EMAIL,
           then: Joi.required(),
@@ -46,6 +46,7 @@ export default {
       deviceType: Joi.string()
         .valid(DeviceType.iOS, DeviceType.android)
         .required(),
+      deviceId: Joi.string().trim().required(),
       deviceToken: Joi.string().trim().optional(),
       lat: Joi.number().min(-90).max(90).allow(0).optional().default(0),
       lng: Joi.number().min(-180).max(180).allow(0).optional().default(0),
@@ -55,10 +56,11 @@ export default {
   loginUserSchema: {
     body: Joi.object({
       email: Joi.string().trim().email().lowercase().required(),
-      password: Joi.string().min(8).required(),
+      password: passwordSchema,
       deviceType: Joi.string()
         .valid(DeviceType.iOS, DeviceType.android)
         .required(),
+      deviceId: Joi.string().trim().required(),
       deviceToken: Joi.string().trim().optional(),
       lat: Joi.number().min(-90).max(90).allow(0).optional().default(0),
       lng: Joi.number().min(-180).max(180).allow(0).optional().default(0),
@@ -89,35 +91,28 @@ export default {
       deviceType: Joi.string()
         .valid(DeviceType.iOS, DeviceType.android)
         .required(),
+      deviceId: Joi.string().trim().required(),
       deviceToken: Joi.string().trim().optional(),
       lat: Joi.number().min(-90).max(90).allow(0).optional().default(0),
       lng: Joi.number().min(-180).max(180).allow(0).optional().default(0),
     }),
   },
 
-  verifyOtpSchema: {
-    body: Joi.object({
-      email: Joi.string().trim().email().lowercase().required(),
-      otp: Joi.string().length(4).required(),
-    }),
-  },
-
   resetPasswordSchema: {
     body: Joi.object({
-      id: mongoIdValidator.required().messages({
-        'string.hex': messagesConstants.INVALID_USER_ID,
-        'string.length': messagesConstants.INVALID_USER_ID,
-      }),
-      password: Joi.string().required(),
+      email: Joi.string().trim().email().lowercase().required(),
+      otp: Joi.string()
+        .length(6)
+        .pattern(/^[0-9]+$/)
+        .required(),
+      password: passwordSchema,
     }),
   },
 
   refreshTokenSchema: {
     body: Joi.object({
-      id: mongoIdValidator.required().messages({
-        'string.hex': messagesConstants.INVALID_USER_ID,
-        'string.length': messagesConstants.INVALID_USER_ID,
-      }),
+      refreshToken: Joi.string().trim().required(),
+      deviceId: Joi.string().trim().min(1).max(128).required(),
       lat: Joi.number().min(-90).max(90).allow(0).optional().default(0),
       lng: Joi.number().min(-180).max(180).allow(0).optional().default(0),
     }),
@@ -139,7 +134,7 @@ export default {
   changePasswordSchema: {
     body: Joi.object({
       currentPassword: Joi.string().required(),
-      newPassword: Joi.string().required(),
+      newPassword: passwordSchema,
     }),
   },
 

@@ -2,12 +2,13 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { Socket } from 'socket.io';
 
-import config from '../configs/common.config';
 import messagesConstants from '../constants/messages.constants';
-import { JwtPayload } from '../interfaces/user.interface';
+import { TokenType } from '../interfaces/user.interface';
 import { IUsers } from '../models/Users';
 import UserRepository from '../repositories/user.repository';
+import UserSessionRepository from '../repositories/userSession.repository';
 import ApiResponse from '../utils/apiResponse';
+import JwtUtil from '../utils/jwt.util';
 
 /**
  * Extend Express Request to include user property
@@ -15,18 +16,31 @@ import ApiResponse from '../utils/apiResponse';
 declare module 'express-serve-static-core' {
   interface Request {
     user?: IUsers | null;
+    sessionId?: string;
   }
 }
 
-export const validateUserFromToken = async (token: string): Promise<IUsers> => {
-  const decoded = jwt.verify(token, config.jwt.secret) as JwtPayload;
+export const validateUserFromToken = async (
+  token: string
+): Promise<{ user: IUsers; sessionId: string }> => {
+  const decoded = await JwtUtil.verifyAccessToken(token);
+
+  if (decoded.type !== TokenType.ACCESS) {
+    throw new jwt.JsonWebTokenError(messagesConstants.INVALID_TOKEN);
+  }
+
+  const session = await UserSessionRepository.findById(decoded.sessionId);
+  if (!session || session.accessToken !== token) {
+    throw new jwt.JsonWebTokenError(messagesConstants.INVALID_TOKEN);
+  }
+
   const user = await UserRepository.findById(decoded.id);
 
   if (!user) {
     throw new jwt.JsonWebTokenError(messagesConstants.INVALID_TOKEN);
   }
 
-  return user;
+  return { user, sessionId: decoded.sessionId };
 };
 
 /**
@@ -65,10 +79,11 @@ export default async (
       return response.status(apiResponse.statusCode).json(apiResponse);
     }
 
-    const user = await validateUserFromToken(token);
+    const { user, sessionId } = await validateUserFromToken(token);
 
     // Attach user data to request object
     request.user = user;
+    request.sessionId = sessionId;
 
     // Proceed to next middleware
     next();
@@ -129,7 +144,7 @@ export const socketAuthMiddleware = async (
       return next(new Error(messagesConstants.INVALID_TOKEN));
     }
 
-    const user = await validateUserFromToken(token);
+    const { user } = await validateUserFromToken(token);
 
     socket.data.user = user;
 

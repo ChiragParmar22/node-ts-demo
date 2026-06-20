@@ -40,6 +40,7 @@ export default {
 
   USER_NOT_REGISTERED:
     'This email is not registered with us. Please use correct email address.',
+  INVALID_CREDENTIALS: 'Invalid email or password.',
   INCORRECT_PASSWORD: 'Your password is incorrect.',
   EMAIL_ALREADY_EXISTS:
     'This email is already registered with us. Please try another email.',
@@ -62,6 +63,8 @@ export default {
     'OTP has been expired or invalid. Please try again or resend OTP.',
   INVALID_OTP: 'Invalid OTP.',
   OTP_VERIFIED: 'OTP verified successfully.',
+  INVALID_REFRESH_TOKEN:
+    'Invalid or expired refresh token. Please sign in again.',
   USER_REGISTERED_WITH_SOCIAL_LOGIN_FORGOT_PASSWORD:
     'Social login user cannot forgot password.',
   PASSWORD_RESET_SUCCESSFULLY: 'Password reset successfully.',

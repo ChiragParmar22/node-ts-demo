@@ -69,4 +69,11 @@ export default class RegexUtil {
    * Suitable for common regional formats after trimming; normalize in validation.
    */
   static readonly LICENSE_PLATE = /^[A-Z0-9]{5,15}$/;
+
+  /**
+   * Escapes special regex characters in a user-provided search string.
+   */
+  static escapeRegex(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
 }

@@ -23,6 +23,7 @@ export interface RegisterInput {
   otp?: string;
   socialId?: string | null;
   deviceType: DeviceType.iOS | DeviceType.android;
+  deviceId: string;
   deviceToken?: string | null;
   lat?: number;
   lng?: number;
@@ -34,7 +35,8 @@ export interface RegisterInput {
 export interface LoginInput {
   email: string;
   password: string;
-  deviceType?: DeviceType.iOS | DeviceType.android | null;
+  deviceType: DeviceType.iOS | DeviceType.android;
+  deviceId: string;
   deviceToken?: string | null;
   lat?: number;
   lng?: number;
@@ -48,17 +50,10 @@ export interface SocialLoginInput {
   socialLoginType: SocialLoginType;
   socialId?: string | null;
   deviceType: DeviceType.iOS | DeviceType.android;
+  deviceId: string;
   deviceToken?: string | null;
   lat?: number;
   lng?: number;
-}
-
-/**
- * Verify OTP input interface
- */
-export interface VerifyOtpInput {
-  email: string;
-  otp: string;
 }
 
 /**
@@ -66,6 +61,8 @@ export interface VerifyOtpInput {
  */
 export interface ResetPasswordInput {
   id: string;
+  email: string;
+  otp: string;
   password: string;
 }
 
@@ -73,7 +70,8 @@ export interface ResetPasswordInput {
  * Refresh token input interface
  */
 export interface RefreshTokenInput {
-  id: string;
+  refreshToken: string;
+  deviceId: string;
   lat?: number;
   lng?: number;
 }
@@ -94,11 +92,18 @@ export interface DeleteAccountInput {
   deleteReason: string;
 }
 
+export enum TokenType {
+  ACCESS = 'access',
+  REFRESH = 'refresh',
+}
+
 /**
  * JWT payload interface
  */
 export interface JwtPayload {
   id: string;
+  sessionId: string;
+  type: TokenType;
   iat?: number;
   exp?: number;
 }

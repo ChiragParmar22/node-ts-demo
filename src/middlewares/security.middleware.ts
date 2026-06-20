@@ -61,4 +61,18 @@ export default (app: Application): void => {
 
   // Apply strict rate limiter to login endpoint
   app.use('/api/auth/login', authLimiter);
+
+  // Contact form: 2 requests per 10 minutes per IP
+  const contactUsLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 2,
+    message: {
+      status: 429,
+      message: 'Too many contact requests. Please try again after 10 minutes.',
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  app.use('/api/contactUs', contactUsLimiter);
 };

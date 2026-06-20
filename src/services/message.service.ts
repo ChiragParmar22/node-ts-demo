@@ -6,6 +6,7 @@ import { IMessages } from '../models/Messages';
 import { IUsers } from '../models/Users';
 import MessageRepository from '../repositories/message.repository';
 import ApiResponse from '../utils/apiResponse';
+import RegexUtil from '../utils/regex.util';
 
 export default class MessageService {
   static async getMessages(
@@ -28,7 +29,8 @@ export default class MessageService {
     };
 
     if (search) {
-      filter.message = { $regex: search, $options: 'i' };
+      const escapedSearch = RegexUtil.escapeRegex(search.trim()).slice(0, 100);
+      filter.message = { $regex: escapedSearch, $options: 'i' };
     }
 
     const [messages, total] = await Promise.all([

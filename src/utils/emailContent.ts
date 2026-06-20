@@ -1,9 +1,15 @@
 import config from '../configs/common.config';
-const appName = config.APP_NAME;
+
+import { escapeHtml } from './htmlEscape.util';
+
+const appName = escapeHtml(config.APP_NAME);
 const emailHead = config.SERVER_URL + '/public/images/ehead.png';
 const emailFooter = config.SERVER_URL + '/public/images/envelope.png';
 
 export const registerMail = ({ name, otp }: { name: string; otp: string }) => {
+  const safeName = escapeHtml(name);
+  const safeOtp = escapeHtml(otp);
+
   return `
     <div
       style="
@@ -68,13 +74,13 @@ export const registerMail = ({ name, otp }: { name: string; otp: string }) => {
                         text-align: center;
                       "
                     >
-                      <b>Hi ${name}!</b><br /><br />
+                      <b>Hi ${safeName}!</b><br /><br />
                       Thank you for creating an account with ${appName}.
                       <br /><br />
                       To access your account, we need you to finalize the
                       verification process.
                       <br /><br />
-                      Your authentication code is: ${otp}
+                      Your authentication code is: ${safeOtp}
                     </div>
                   </div>
                   <div
@@ -130,6 +136,9 @@ export const forgotPasswordMail = ({
   name: string;
   otp: string;
 }) => {
+  const safeName = escapeHtml(name);
+  const safeOtp = escapeHtml(otp);
+
   return `
     <div
       style="
@@ -194,10 +203,10 @@ export const forgotPasswordMail = ({
                         text-align: center;
                       "
                     >
-                      <b>Hi ${name}!</b><br /><br />We've received a request to
+                      <b>Hi ${safeName}!</b><br /><br />We've received a request to
                       reset your password. If you didn't make the request, just
                       ignore this email.<br />Your reset password authentication
-                      code is: ${otp}<br /><br />If you have any questions or
+                      code is: ${safeOtp}<br /><br />If you have any questions or
                       trouble logging on please contact an app administrator.
                     </div>
                   </div>
@@ -260,6 +269,11 @@ export const contactUsMail = ({
   subject,
   message,
 }: ContactUsArgs) => {
+  const safeName = escapeHtml(name);
+  const safeEmail = escapeHtml(email);
+  const safeSubject = escapeHtml(subject);
+  const safeMessage = escapeHtml(message);
+
   return `
     <div
       style="
@@ -347,7 +361,7 @@ export const contactUsMail = ({
                       >
                         Name :
                       </td>
-                      <td style="vertical-align: top">${name}</td>
+                      <td style="vertical-align: top">${safeName}</td>
                     </tr>
                     <tr>
                       <td
@@ -359,7 +373,7 @@ export const contactUsMail = ({
                       >
                         Email :
                       </td>
-                      <td style="vertical-align: top">${email}</td>
+                      <td style="vertical-align: top">${safeEmail}</td>
                     </tr>
                     <tr>
                       <td
@@ -371,7 +385,7 @@ export const contactUsMail = ({
                       >
                         Subject :
                       </td>
-                      <td style="vertical-align: top">${subject}</td>
+                      <td style="vertical-align: top">${safeSubject}</td>
                     </tr>
                     <tr>
                       <td
@@ -383,7 +397,7 @@ export const contactUsMail = ({
                       >
                         Message :
                       </td>
-                      <td style="vertical-align: top">${message}</td>
+                      <td style="vertical-align: top">${safeMessage}</td>
                     </tr>
                   </table>
 

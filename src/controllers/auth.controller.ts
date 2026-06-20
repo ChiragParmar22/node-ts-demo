@@ -7,7 +7,6 @@ import {
   ResetPasswordInput,
   SendOtpInput,
   SocialLoginInput,
-  VerifyOtpInput,
 } from '../interfaces/user.interface';
 import AuthService from '../services/auth.services';
 
@@ -96,24 +95,6 @@ export default class AuthController {
     try {
       const result = await AuthService.forgotPassword(
         request.body as SendOtpInput
-      );
-      return response.status(result.statusCode).json(result);
-    } catch (error: unknown) {
-      return next(error);
-    }
-  }
-
-  /**
-   * Handle user verify otp
-   */
-  static async verifyOtp(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ): Promise<unknown> {
-    try {
-      const result = await AuthService.verifyOtp(
-        request.body as VerifyOtpInput
       );
       return response.status(result.statusCode).json(result);
     } catch (error: unknown) {

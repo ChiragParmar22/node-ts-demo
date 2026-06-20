@@ -14,6 +14,8 @@ import ApiResponse from '../utils/apiResponse';
 import BcryptjsUtil from '../utils/bcryptjs.util';
 import CommonFunctions from '../utils/commonFunctions';
 
+import SessionService from './session.service';
+
 /**
  * Remove sensitive fields from user object
  */
@@ -137,11 +139,8 @@ export default class UserService {
   /**
    * Logout user
    */
-  static async logout(user: IUsers): Promise<ApiResponse> {
-    await UserRepository.updateUserById(user._id, {
-      deviceType: null,
-      deviceToken: null,
-    });
+  static async logout(sessionId: string): Promise<ApiResponse> {
+    await SessionService.revokeSession(sessionId);
 
     return ApiResponse.success({}, messagesConstants.LOGOUT_SUCCESSFULLY);
   }
@@ -153,11 +152,11 @@ export default class UserService {
     user: IUsers,
     body: DeleteAccountInput
   ): Promise<ApiResponse> {
+    await SessionService.revokeAllSessions(user._id.toString());
+
     await UserRepository.updateUserById(user._id, {
       deletedAt: new Date(),
       deleteReason: body.deleteReason,
-      deviceType: null,
-      deviceToken: null,
       socketId: null,
     });
 

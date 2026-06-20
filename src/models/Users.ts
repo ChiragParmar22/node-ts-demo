@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
-import { DeviceType, SocialLoginType } from '../constants/key.constants';
+import { SocialLoginType } from '../constants/key.constants';
 
 export interface IUsers extends Document {
   _id: Types.ObjectId;
@@ -8,8 +8,6 @@ export interface IUsers extends Document {
   email: string;
   countryCode: string | null;
   phoneNumber: string | null;
-  deviceType: DeviceType | null;
-  deviceToken: string | null;
   socialLoginType: SocialLoginType;
   socialId: string | null;
   password: string | null;
@@ -28,12 +26,6 @@ const UsersSchema = new Schema<IUsers>(
     email: { type: String, required: true },
     countryCode: { type: String, default: null },
     phoneNumber: { type: String, default: null },
-    deviceType: {
-      type: String,
-      enum: [...Object.values(DeviceType)],
-      required: true,
-    },
-    deviceToken: { type: String, default: null },
     socialLoginType: {
       type: String,
       enum: Object.values(SocialLoginType),

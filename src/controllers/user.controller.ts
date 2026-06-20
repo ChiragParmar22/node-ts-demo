@@ -77,7 +77,7 @@ export default class UserController {
     next: NextFunction
   ): Promise<unknown> {
     try {
-      const result = await UserService.logout(request.user as IUsers);
+      const result = await UserService.logout(request.sessionId as string);
       return response.status(result.statusCode).json(result);
     } catch (error: unknown) {
       return next(error);
