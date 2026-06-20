@@ -55,4 +55,7 @@ export default {
   SMTP_HOST: process.env.SMTP_HOST || '',
   SMTP_USERNAME: process.env.SMTP_USERNAME || '',
   SMTP_PASSWORD: process.env.SMTP_PASSWORD || '',
+
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
+  STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY || '',
 };

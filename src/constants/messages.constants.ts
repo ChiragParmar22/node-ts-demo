@@ -116,4 +116,12 @@ export default {
     'Invalid receiverId format. Must be a 24-character hex string.',
   INVALID_MESSAGE_ID:
     'Invalid messageId format. Must be a 24-character hex string.',
+
+  STRIPE_CUSTOMER_CREATED: 'Stripe customer created successfully.',
+  STRIPE_CUSTOMER_FETCHED: 'Stripe customer fetched successfully.',
+  STRIPE_CUSTOMER_UPDATED: 'Stripe customer updated successfully.',
+  STRIPE_CUSTOMER_DELETED: 'Stripe customer deleted successfully.',
+  STRIPE_CUSTOMER_NOT_FOUND: 'Stripe customer not found.',
+  STRIPE_CUSTOMER_ALREADY_EXISTS:
+    'Stripe customer already exists for this user.',
 };
