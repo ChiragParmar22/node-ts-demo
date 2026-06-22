@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { FilterQuery, Types, UpdateQuery } from 'mongoose';
 
 import { TransactionStatus } from '../constants/key.constants';
 import { ITransactions, Transactions } from '../models/Transactions';
@@ -70,6 +70,23 @@ export default class TransactionRepository {
     return await Transactions.findByIdAndUpdate(
       transactionId,
       { deletedAt: new Date() },
+      { new: true }
+    );
+  }
+
+  static async findOne(
+    filter: FilterQuery<ITransactions>
+  ): Promise<ITransactions | null> {
+    return await Transactions.findOne({ ...filter, deletedAt: null });
+  }
+
+  static async findOneAndUpdate(
+    filter: FilterQuery<ITransactions>,
+    update: UpdateQuery<ITransactions>
+  ): Promise<ITransactions | null> {
+    return await Transactions.findOneAndUpdate(
+      { ...filter, deletedAt: null },
+      { ...update, updatedAt: new Date() },
       { new: true }
     );
   }

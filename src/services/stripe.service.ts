@@ -111,4 +111,74 @@ export default class StripeService {
   ): Promise<Stripe.PaymentIntent> {
     return await stripeClient.paymentIntents.create(params);
   }
+
+  /**
+   * Create a connected account on Stripe
+   */
+  static async createConnectAccount(
+    params: Stripe.AccountCreateParams
+  ): Promise<Stripe.Account> {
+    return await stripeClient.accounts.create(params);
+  }
+
+  /**
+   * Create an account link for custom/express onboarding
+   */
+  static async createAccountLink(
+    params: Stripe.AccountLinkCreateParams
+  ): Promise<Stripe.AccountLink> {
+    return await stripeClient.accountLinks.create(params);
+  }
+
+  /**
+   * Retrieve a connected account from Stripe
+   */
+  static async retrieveConnectAccount(
+    accountId: string
+  ): Promise<Stripe.Account> {
+    return await stripeClient.accounts.retrieve(accountId);
+  }
+
+  /**
+   * Retrieve a charge from Stripe
+   */
+  static async retrieveCharge(chargeId: string): Promise<Stripe.Charge> {
+    return await stripeClient.charges.retrieve(chargeId);
+  }
+
+  /**
+   * Retrieve a balance transaction from Stripe
+   */
+  static async retrieveBalanceTransaction(
+    balanceTransactionId: string
+  ): Promise<Stripe.BalanceTransaction> {
+    return await stripeClient.balanceTransactions.retrieve(
+      balanceTransactionId
+    );
+  }
+
+  /**
+   * Create an account link for KYC/Account Update onboarding
+   */
+  static async uploadKYC(params: {
+    accountId: string;
+  }): Promise<Stripe.AccountLink> {
+    return await stripeClient.accountLinks.create({
+      account: params.accountId,
+      type: 'account_update',
+      refresh_url: `${config.SERVER_URL}/api/stripe/externalAccount/create`,
+      return_url: `${config.SERVER_URL}/api/stripe/externalAccount/success`,
+    });
+  }
+
+  /**
+   * List all bank accounts for a Stripe Connected Account
+   */
+  static async listBankAccounts(
+    accountId: string
+  ): Promise<Stripe.ApiList<Stripe.BankAccount>> {
+    return (await stripeClient.accounts.listExternalAccounts(accountId, {
+      object: 'bank_account',
+    })) as Stripe.ApiList<Stripe.BankAccount>;
+  }
 }

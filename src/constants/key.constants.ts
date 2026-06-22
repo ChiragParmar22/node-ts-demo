@@ -17,7 +17,19 @@ export enum ChatType {
   VIDEO = 'video',
 }
 
-export enum NotificationType {}
+export enum NotificationType {
+  DEPOSIT_SUCCESS = 'deposit_success',
+  DEPOSIT_FAILED = 'deposit_failed',
+  DEPOSIT_CANCELED = 'deposit_canceled',
+  PAYOUT_SUCCESS = 'payout_success',
+  PAYOUT_FAILED = 'payout_failed',
+  PAYOUT_CANCELED = 'payout_canceled',
+  KYC_VERIFIED = 'kyc_verified',
+  KYC_REJECTED = 'kyc_rejected',
+  DOCUMENT_VERIFICATION_REQUIRED = 'document_verification_required',
+  DOCUMENT_VERIFICATION_VERIFIED = 'document_verification_verified',
+  DOCUMENT_VERIFICATION_REJECTED = 'document_verification_rejected',
+}
 
 export enum NotificationStatus {
   PENDING = 'pending',
@@ -66,6 +78,15 @@ export enum TransactionStatus {
   SUCCEEDED = 'succeeded',
   FAILED = 'failed',
   REFUNDED = 'refunded',
+  COMPLETED = 'completed',
+  CANCELED = 'canceled',
+}
+
+export enum KYC_STATUS {
+  PENDING = 'pending',
+  REQUESTED = 'requested',
+  VERIFIED = 'verified',
+  REJECTED = 'rejected',
 }
 
 export enum PaymentMethod {

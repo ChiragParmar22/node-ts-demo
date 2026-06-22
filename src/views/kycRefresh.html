@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Continue KYC</title>
+
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #f4f4f4;
+        text-align: center;
+        padding: 50px;
+      }
+
+      h1 {
+        color: #f59e0b;
+      }
+
+      p {
+        color: #333;
+        font-size: 18px;
+      }
+
+      button {
+        background-color: #2563eb;
+        color: white;
+        padding: 12px 24px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        border-radius: 6px;
+        margin-top: 20px;
+      }
+
+      button:hover {
+        background-color: #1e40af;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>KYC Session Expired</h1>
+
+    <p>
+      Your verification session expired or was interrupted.
+      <br />
+      Please continue to complete your KYC.
+    </p>
+
+    <button onclick="retryKYC()">Continue KYC</button>
+
+    <script>
+      async function retryKYC() {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const token = params.get('token');
+          const res = await fetch(
+            `/api/payment/stripe/kyc/refresh-url?token={{TOKEN}}`
+          );
+          const data = await res.json();
+
+          if (data.url || data?.data?.url) {
+            window.location.href = data.url || data?.data?.url;
+          } else {
+            alert('Something went wrong. Please try again.');
+          }
+        } catch (err) {
+          alert('Error restarting KYC');
+        }
+      }
+    </script>
+  </body>
+</html>

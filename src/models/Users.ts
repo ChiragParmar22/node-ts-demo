@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
-import { SocialLoginType } from '../constants/key.constants';
+import { KYC_STATUS, SocialLoginType } from '../constants/key.constants';
 
 export interface IUsers extends Document {
   _id: Types.ObjectId;
@@ -15,6 +15,8 @@ export interface IUsers extends Document {
   socketId: string | null;
   location: { type: string; coordinates: number[] };
   walletBalance: number;
+  accountId: string | null;
+  kycStatus: KYC_STATUS | null;
   deleteReason: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -41,6 +43,12 @@ const UsersSchema = new Schema<IUsers>(
       coordinates: { type: [Number], index: '2dsphere' },
     },
     walletBalance: { type: Number, default: 0 },
+    accountId: { type: String, default: null },
+    kycStatus: {
+      type: String,
+      enum: Object.values(KYC_STATUS),
+      default: null,
+    },
     deleteReason: { type: String, default: null },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },

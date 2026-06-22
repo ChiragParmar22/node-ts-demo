@@ -1,4 +1,4 @@
-import { FilterQuery, Types } from 'mongoose';
+import { FilterQuery, Types, UpdateQuery } from 'mongoose';
 
 import { IUsers, Users } from '../models/Users';
 
@@ -36,7 +36,24 @@ export default class UserRepository {
     return await Users.findOne({ _id: id, deletedAt: null });
   }
 
+  static async findUserById(
+    id: string | Types.ObjectId
+  ): Promise<IUsers | null> {
+    return await Users.findOne({ _id: id, deletedAt: null });
+  }
+
   static async findUser(filter: FilterQuery<IUsers>): Promise<IUsers | null> {
     return await Users.findOne({ ...filter, deletedAt: null });
+  }
+
+  static async updateUser(
+    filter: FilterQuery<IUsers>,
+    data: UpdateQuery<IUsers>
+  ): Promise<IUsers | null> {
+    return await Users.findOneAndUpdate(
+      filter,
+      { ...data, updatedAt: new Date() },
+      { new: true }
+    );
   }
 }

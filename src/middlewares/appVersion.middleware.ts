@@ -18,6 +18,8 @@ const bypassedApis = [
   '/api/stripe/card/addCard',
   '/api/stripe/card/add',
   '/api/stripe/webhook',
+  '/api/stripe/externalAccount/success',
+  '/api/stripe/externalAccount/refresh',
 ];
 
 export default async (

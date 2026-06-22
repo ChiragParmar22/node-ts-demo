@@ -133,4 +133,24 @@ export default {
   STRIPE_CARD_PRIMARY_UPDATED: 'Primary card updated successfully.',
   STRIPE_PAYMENT_SUCCESS: 'Payment processed successfully.',
   STRIPE_PAYMENT_FAILED: 'Payment failed.',
+  STRIPE_ONBOARDING_LINK_CREATED:
+    'Stripe onboarding link created successfully.',
+  STRIPE_ACCOUNT_NOT_FOUND: 'Stripe connected account not found for this user.',
+  STRIPE_BANK_ACCOUNT_SUCCESS: 'Bank account connected successfully.',
+  DEPOSIT_SUCCESSFUL: (amount: number) =>
+    `Deposit of $${amount} was successful.`,
+  DEPOSIT_FAILED: (amount: number) => `Deposit of $${amount} failed.`,
+  DEPOSIT_CANCELED: (amount: number) => `Deposit of $${amount} was canceled.`,
+  WITHDRAW_CANCELED: (amount: number) =>
+    `Withdrawal of $${amount} was canceled.`,
+  WITHDRAW_FAILED: (amount: number, reason: string | null) =>
+    `Withdrawal of $${amount} failed${reason ? `: ${reason}` : ''}.`,
+  WITHDRAW_SUCCESSFUL: (amount: number) =>
+    `Withdrawal of $${amount} was successful.`,
+  KYC_VERIFIED: 'KYC Verification succeeded.',
+  KYC_REJECTED: 'KYC Verification failed.',
+  DOCUMENT_REQUIRED: 'Additional document upload is required for verification.',
+  DOCUMENT_VERIFIED: 'Document verified successfully.',
+  DOCUMENT_REJECTED: 'Document verification failed.',
+  BANK_ACCOUNT_NOT_FOUND: 'Bank account not found.',
 };
